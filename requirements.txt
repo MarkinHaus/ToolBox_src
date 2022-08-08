@@ -1,0 +1,2 @@
+keyboard>=0.13.5
+readchar>=3.1.0
