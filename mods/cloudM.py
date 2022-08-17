@@ -23,13 +23,13 @@ class Tools(MainTool, FileHandler):
         self.add = []
         self.tools = {
             "all": [["Version", "Shows current Version"],
-                    ["ADD", "adds a mod to default load"],
-                    ["REM", "remove a mod from default load"],
-                    ["NEW", "crate a boilerplate file to make a new mod"],
+                    ["ADD", "adds a mod to default load ", "add is case sensitive"],
+                    ["REM", "remove a mod from default load", "add is case sensitive"],
+                    ["NEW", "crate a boilerplate file to make a new mod", "add is case sensitive"],
                     ["LIST", "list all automatically loaded modules"],
-                    ["download", "download a mod from MarkinHaus server"],
-                    ["#update", "update a mod from MarkinHaus server ", Style.RED("NOT IMPLEMENTED")],
-                    ["upload", "upload a mod to MarkinHaus server"],
+                    ["download", "download a mod from MarkinHaus server", "add is case sensitive"],
+                    ["#update", "update a mod from MarkinHaus server ", Style.RED("NOT IMPLEMENTED"), "add is case sensitive"],
+                    ["upload", "upload a mod to MarkinHaus server", "add is case sensitive"],
                     ["first-web-connection", "set up a web connection to MarkinHaus"],
                     ],
             "name": "cloudM",
@@ -54,8 +54,8 @@ class Tools(MainTool, FileHandler):
         self.get_version()
 
     def on_exit(self):
-        self.open_s_file_handler()
         self.add_to_save_file_handler(self.keys["DM"], str(self.add))
+        self.open_s_file_handler()
         self.save_file_handler()
         self.file_handler_storage.close()
 
@@ -65,7 +65,7 @@ class Tools(MainTool, FileHandler):
     def get_version(self):
         version_command = self.get_file_handler(self.keys["URL"])
         url = "http://127.0.0.1:8080/cloudM/version"
-        if version_command != "None":
+        if version_command is not None:
             url = version_command + "/cloudM/version"
 
         self.print(url)
@@ -73,7 +73,8 @@ class Tools(MainTool, FileHandler):
         try:
             self.version = requests.get(url).json()["version"]
         except Exception:
-            self.print(Style.RED("Error retrieving version information "))
+            self.print(Style.RED("Error retrieving version information "
+                                 "\n\tplease check your command : cloudM first-web-connection"))
 
         self.print("Version: %s" % self.version)
 
@@ -161,6 +162,7 @@ class Tools(MainTool):  # FileHandler
         self.name = "NAME"
         self.logs = logs
         self.color = "WHITE"
+        # self.keys = {}
         self.tools = {
             "all": [["Version", "Shows current Version"]],
             "name": "NAME",
@@ -168,14 +170,20 @@ class Tools(MainTool):  # FileHandler
         }
         # FileHandler.__init__(self, "File name")
         MainTool.__init__(self, load=self.on_start, v=self.version, tool=self.tools,
-                    name=self.name, logs=self.logs, color=self.color, on_exit=self.on_exit)
+                        name=self.name, logs=self.logs, color=self.color, on_exit=self.on_exit)
+                    
     def show_version(self):
         self.print("Version: ", self.version)
 
-    def on_start(self):
+    def load_open_file(self):
+        # self.open_l_file_handler()
+        # self.load_file_handler()
         pass
 
     def on_exit(self):
+        # self.open_s_file_handler()
+        # self.save_file_handler()
+        # self.file_handler_storage.close()
         pass
 """
         if len(name) > 1:
@@ -201,7 +209,7 @@ class Tools(MainTool):  # FileHandler
     def upload(self, input_):
         version_command = self.get_file_handler(self.keys["URL"])
         url = "http://127.0.0.1:8080/cloudM/upload"
-        if version_command != "None":
+        if version_command is not None:
             url = version_command + "/cloudM/upload"
         try:
             if len(input_) == 3:
@@ -253,7 +261,7 @@ class Tools(MainTool):  # FileHandler
     def download(self, input_):
         version_command = self.get_file_handler(self.keys["URL"])
         url = "http://127.0.0.1:8080/cloudM/static"
-        if version_command != "None":
+        if version_command is not None:
             url = version_command + "/cloudM/static"
         try:
             if len(input_) == 3:
@@ -292,8 +300,10 @@ class Tools(MainTool):  # FileHandler
         Adds a url to the list of urls
         """
 
-        addres = input("Pleas enter URL of CloudM Backend default [http://45.79.251.173:8080] : ")
-        if addres == "":
-            addres = "http://45.79.251.173:8080"
-        self.print(Style.YELLOW(f"Adding url : {addres}"))
-        self.add_to_save_file_handler(self.keys["URL"], addres)
+        url = input("Pleas enter URL of CloudM Backend default [http://45.79.251.173:8080] : ")
+        if url == "":
+            url = "http://45.79.251.173:8080"
+        self.print(Style.YELLOW(f"Adding url : {url}"))
+        self.add_to_save_file_handler(self.keys["URL"], url)
+
+

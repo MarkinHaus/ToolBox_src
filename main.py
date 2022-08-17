@@ -334,7 +334,7 @@ def main(args):
         elif u[0].upper() in MOD_LIST.keys():
             COMMAND_HISTORY.append(u)
             AC_MOD = MOD_LIST[u[0].upper()]
-            PREFIX = Style.CYAN(f"~{node()}:{Style.Bold(u[0].upper())}{Style.CYAN('@>')}")
+            PREFIX = Style.CYAN(f"~{node()}:{Style.Bold(pretty_print([u[0].upper()]).strip())}{Style.CYAN('@>')}")
             for spec in AC_MOD.tools["all"]:
                 SUPER_SET.append(spec[0].upper())
 
@@ -356,7 +356,7 @@ def main(args):
 if __name__ == '__main__':
     # C:\Users\Markin\anaconda3\envs\ToolBoxV2\python.exe main.py
     os.system("")
-    MACRO = ['HELP', 'LOAD-MOD', 'LOGS', 'EXIT', '..']
+    MACRO = ['HELP', 'LOAD-MOD', 'LOGS', 'EXIT', '_hr', '..']
     MACRO_color = {'HELP': 'GREEN',
                    'LOAD-MOD': 'BLUE',
                    'EXIT': 'RED',
@@ -375,6 +375,7 @@ if __name__ == '__main__':
                 'Brings u Back to Main']],
         'LOGS': [['Information', 'version : 0.1.0', 'color : MAGENTA', 'syntax : LOGS',
                   'show logs']],
+        '_hr': [['Information', 'version : ----', 'Hotreload all mods']]
     }
     PREFIX = Style.CYAN(f"~{node()}@>")
     logs = []
@@ -387,12 +388,17 @@ if __name__ == '__main__':
     INFO = lode_mod(load_welcome_page()).print_t
     CLOUDM = lode_mod(load_welcome_page("cloudM"))
     CLOUDM.lode_mods(load_welcome_page, lode_mod)
-#
+##
     COMMAND_HISTORY = CLOUDM.load_history()
 
     print('\033[?25l', end="")
 
     main(sys.argv)
+
+
+    print("\n\n\n\tEXIT")
+    input("Press Enter to EXIT")
+
 
 
 # TODO Load modular Mods
