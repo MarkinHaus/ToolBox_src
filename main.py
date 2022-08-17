@@ -167,7 +167,7 @@ def user_input(c_h):
         elif key == b' ' or key == ' ':
             print_command.append(command)
             command = ""
-        elif key == b'\r' or key == '\r':
+        elif key == readchar.key.ENTER:
             get_input = False
             print_command.append(command)
         elif key == b'\t' or key == '\t':
