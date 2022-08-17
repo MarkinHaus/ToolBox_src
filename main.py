@@ -5,6 +5,7 @@ from platform import system, node
 from importlib import import_module
 from inspect import signature
 # Import local Pages
+
 from mods.mainTool import MainTool
 from Style import Style
 
@@ -147,14 +148,14 @@ def user_input(c_h):
             print_command = []
             if history_step < len(c_h) - 1:
                 print_command = c_h[history_step]
-                history_step += 1
+                history_step -= 1
 
         elif key == readchar.key.DOWN:
             command = ""
             print_command = []
             if history_step > 0:
                 print_command = c_h[history_step]
-                history_step -= 1
+                history_step += 1
 
         elif key == b'\x08' or key == '\x7f':
             if len(command) == 0 and len(print_command) != 0:
@@ -187,7 +188,7 @@ def user_input(c_h):
         if do:
             helper = options[helper_index][len(command):].lower()
 
-        to_print = PREFIX + pretty_print(print_command + [command + Style.Bold(helper)])
+        to_print = PREFIX + pretty_print(print_command + [command + Style.Underline(Style.Bold(helper))])
         if do:
             to_print += " | " + Style.Bold(options[helper_index]) + " " + str(options)
         sys.stdout.write("\033[K")
@@ -386,12 +387,13 @@ if __name__ == '__main__':
     INFO = lode_mod(load_welcome_page()).print_t
     CLOUDM = lode_mod(load_welcome_page("cloudM"))
     CLOUDM.lode_mods(load_welcome_page, lode_mod)
-
+#
     COMMAND_HISTORY = CLOUDM.load_history()
 
     print('\033[?25l', end="")
 
     main(sys.argv)
+
 
 # TODO Load modular Mods
 #   TODO Helper mods _supported DON

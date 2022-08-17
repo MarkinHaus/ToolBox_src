@@ -1,5 +1,12 @@
+import os
+from platform import system
 from time import sleep
 
+def cls():
+    if system() == "Windows":
+        os.system("cls")
+    if system() == "Linux":
+        os.system("clear")
 
 class Style:
     _BLACK = '\u001b[30m'
@@ -85,18 +92,23 @@ class Style:
 
     @staticmethod
     def loading_al(text: str):
+
         b = f"{text} /"
-        print(b, end="\r")
+        print(b)
         sleep(0.05)
+        cls()
         b = f"{text} -"
-        print(b, end="\r")
+        print(b)
         sleep(0.05)
+        cls()
         b = f"{text} \\"
-        print(b, end="\r")
+        print(b)
         sleep(0.05)
+        cls()
         b = f"{text} |"
-        print(b, end="\r")
+        print(b)
         sleep(0.05)
+        cls()
 
     @property
     def END(self):
