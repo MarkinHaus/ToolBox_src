@@ -116,6 +116,7 @@ class FileHandler(Code):
             print("WARNING pleas open storage")
         self.file_handler_load = []
         for line in self.file_handler_storage:
+            line = line[:-1]
             heda = line[:10]
             enc = self.decode_code(line[10:])
             append = [heda, enc]

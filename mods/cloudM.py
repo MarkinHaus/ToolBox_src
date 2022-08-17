@@ -11,7 +11,7 @@ import requests
 class Tools(MainTool, FileHandler):
 
     def __init__(self, logs=None):
-        self.version = "0.2.1"
+        self.version = "0.1.2"
         self.name = "cloudM"
         self.logs = logs
         self.color = "CYAN"
@@ -103,14 +103,13 @@ class Tools(MainTool, FileHandler):
         if history:
             try:
                 history = eval(history)
+                self.print("open history len : " + str(len(history)))
 
+                if type(history) is list and len(history) > 0:
+                    return history
             except SyntaxError and TypeError:
                 self.print("Data default modules is corrupted")
 
-        self.print("open history len : " + str(len(history)))
-
-        if type(history) is list and len(history) > 0:
-            return history
         return []
 
     def save_history(self, history):
@@ -293,8 +292,8 @@ class Tools(MainTool):  # FileHandler
         Adds a url to the list of urls
         """
 
-        addres = input("Pleas enter URL of CloudM Backend default: http://45.79.251.173/")
+        addres = input("Pleas enter URL of CloudM Backend default [http://45.79.251.173:8080] : ")
         if addres == "":
-            addres = "http://45.79.251.173/"
+            addres = "http://45.79.251.173:8080"
         self.print(Style.YELLOW(f"Adding url : {addres}"))
-        self.add_to_save_file_handler(self.keys["HIS"], str(addres))
+        self.add_to_save_file_handler(self.keys["URL"], addres)
