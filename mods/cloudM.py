@@ -30,6 +30,7 @@ class Tools(MainTool, FileHandler):
                     ["download", "download a mod from MarkinHaus server"],
                     ["#update", "update a mod from MarkinHaus server ", Style.RED("NOT IMPLEMENTED")],
                     ["upload", "upload a mod to MarkinHaus server"],
+                    ["first-web-connection", "set up a web connection to MarkinHaus"],
                     ],
             "name": "cloudM",
             "Version": self.show_version,
@@ -39,7 +40,7 @@ class Tools(MainTool, FileHandler):
             "NEW": self.new_module,
             "upload": self.upload,
             "download": self.download,
-            "option-first-web-connection": self.add_url_con,
+            "first-web-connection": self.add_url_con,
         }
 
         FileHandler.__init__(self, "modules.config")
