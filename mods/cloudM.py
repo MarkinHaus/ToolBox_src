@@ -19,6 +19,7 @@ class Tools(MainTool, FileHandler):
             "DM": "def-mods~~",
             "HIS": "comm-his~~",
             "URL": "comm-vcd~~",
+            "TOKEN": "comm-tok~~",
         }
         self.add = []
         self.tools = {
@@ -28,9 +29,12 @@ class Tools(MainTool, FileHandler):
                     ["NEW", "crate a boilerplate file to make a new mod", "add is case sensitive"],
                     ["LIST", "list all automatically loaded modules"],
                     ["download", "download a mod from MarkinHaus server", "add is case sensitive"],
-                    ["#update", "update a mod from MarkinHaus server ", Style.RED("NOT IMPLEMENTED"), "add is case sensitive"],
+                    ["#update", "update a mod from MarkinHaus server ", Style.RED("NOT IMPLEMENTED"),
+                     "add is case sensitive"],
                     ["upload", "upload a mod to MarkinHaus server", "add is case sensitive"],
                     ["first-web-connection", "set up a web connection to MarkinHaus"],
+                    ["create-account", "create a new account"],
+                    ["login", "login with Username & password"]
                     ],
             "name": "cloudM",
             "Version": self.show_version,
@@ -41,6 +45,8 @@ class Tools(MainTool, FileHandler):
             "upload": self.upload,
             "download": self.download,
             "first-web-connection": self.add_url_con,
+            "create-account": self.create_account,
+            "login": self.log_in,
         }
 
         FileHandler.__init__(self, "modules.config")
@@ -64,7 +70,7 @@ class Tools(MainTool, FileHandler):
 
     def get_version(self):
         version_command = self.get_file_handler(self.keys["URL"])
-        url = "http://127.0.0.1:8080/cloudM/version"
+        url = "http://127.0.0.1:8081/cloudM/version"
         if version_command is not None:
             url = version_command + "/cloudM/version"
 
@@ -175,7 +181,7 @@ class Tools(MainTool):  # FileHandler
     def show_version(self):
         self.print("Version: ", self.version)
 
-    def load_open_file(self):
+    def on_start(self):
         # self.open_l_file_handler()
         # self.load_file_handler()
         pass
@@ -208,7 +214,7 @@ class Tools(MainTool):  # FileHandler
 
     def upload(self, input_):
         version_command = self.get_file_handler(self.keys["URL"])
-        url = "http://127.0.0.1:8080/cloudM/upload"
+        url = "http://127.0.0.1:8081/cloudM/upload"
         if version_command is not None:
             url = version_command + "/cloudM/upload"
         try:
@@ -223,7 +229,7 @@ class Tools(MainTool):  # FileHandler
                 index = ["mod", "aug", "text"].index(type_)
 
                 server_type = ["application/mod", "application/aug", "text/*"][index]
-                path = ["mods/", "Augmentation/", "text/"][index]
+                path = ["mods/", "aug/", "text/"][index]
 
                 try:
                     file = open(path + name, "rb").read()
@@ -260,7 +266,7 @@ class Tools(MainTool):  # FileHandler
 
     def download(self, input_):
         version_command = self.get_file_handler(self.keys["URL"])
-        url = "http://127.0.0.1:8080/cloudM/static"
+        url = "http://127.0.0.1:8081/cloudM/static"
         if version_command is not None:
             url = version_command + "/cloudM/static"
         try:
@@ -274,7 +280,7 @@ class Tools(MainTool):  # FileHandler
 
                 index = ["mod", "aug", "text"].index(type_)
 
-                path = ["/mods/", "/Augmentation/", "/text/"][index]
+                path = ["/mods/", "/aug/", "/text/"][index]
 
                 url += path + name
 
@@ -300,10 +306,54 @@ class Tools(MainTool):  # FileHandler
         Adds a url to the list of urls
         """
 
-        url = input("Pleas enter URL of CloudM Backend default [http://45.79.251.173:8080] : ")
+        url = input("Pleas enter URL of CloudM Backend default [http://45.79.251.173:8081] : ")
         if url == "":
-            url = "http://45.79.251.173:8080"
+            url = "http://45.79.251.173:8081"
         self.print(Style.YELLOW(f"Adding url : {url}"))
         self.add_to_save_file_handler(self.keys["URL"], url)
 
+    def create_account(self):
+        version_command = self.get_file_handler(self.keys["URL"])
+        url = "http://127.0.0.1:8081/cloudM/create_acc_mhs"
+        if version_command is not None:
+            url = version_command + "/cloudM/create_acc_mhs"
+        os.system(f"start {url}")
 
+    def log_in(self, input_):
+        version_command = self.get_file_handler(self.keys["URL"])
+        url = "http://127.0.0.1:8081/cloudM/login"
+        if version_command is not None:
+            url = version_command + "/cloudM/login"
+
+        if len(input_) == 3:
+            username = input_[1]
+            password = input_[2]
+
+            data = {"username": username,
+                    "password": password}
+
+            r = requests.post(url, json=data)
+            self.print(r.status_code)
+            self.print(str(r.content, 'utf-8'))
+            token = r.json()["token"]
+            error = r.json()["error"]
+
+            if not error:
+                claims = token.split(".")[1]
+                import base64
+                json_claims = base64.b64decode(claims+'==')
+                claims = eval(str(json_claims, 'utf-8'))
+                self.print(Style.GREEN(f"Welcome : {claims['username']}"))
+                self.print(Style.GREEN(f"Email : {claims['email']}"))
+                self.add_to_save_file_handler(self.keys["TOKEN"], token)
+                self.print("Saving token to file...")
+
+                self.on_exit()
+                self.load_open_file()
+
+                self.print("Saved")
+
+            else:
+                self.print(Style.RED(f"ERROR: {error}"))
+        else:
+            self.print(Style.RED(f"ERROR: {input_} len {len(input_)} != 3"))

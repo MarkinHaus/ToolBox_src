@@ -202,9 +202,9 @@ def user_input(c_h):
 
 
 def open_function(u, ac_mod_):
-    print(f"loading function :", end=" ")
+    print(f"loading function :", end=" ")  # logs -> print
     try:
-        function = ac_mod_.tools[ac_mod_.tools["all"][SUPER_SET.index(u[0].upper())][0]]
+        function = ac_mod_.tools[ac_mod_.tools["all"][SUPER_SET.index(u[0].upper())][0]]  # builtin
         print(Style.GREEN("🆗"))
         print("test function signature", end=" ")
 
@@ -214,14 +214,14 @@ def open_function(u, ac_mod_):
             try:
                 print(Style.GREEN("🆗 ") + "\nStart function\n")
                 function()
-                print(Style.GREEN(f"\nOK fin {u[0]}"))
+                print(Style.GREEN(f"\n-"))
             except Exception as e:
                 print(Style.YELLOW(Style.Bold(f"! function ERROR : {e}")))
         elif params_len == 1:
             try:
                 print(Style.GREEN("🆗 ") + "\nStart function\n")
                 function(u)
-                print(Style.GREEN(f"\nOK fin {u[0]}"))
+                print(Style.GREEN(f"\n-"))
             except Exception as e:
                 print(Style.YELLOW(Style.Bold(f"! function ERROR : {e}")))
         else:
@@ -234,6 +234,29 @@ def open_function(u, ac_mod_):
         print(Style.RED(
             Style.Bold(f"fatal loading error {e} \n{' ' * 18} pleas be sure to run commands assigned to {u[0]}")),
             end='\r')
+
+
+def open_function_debug(u, ac_mod_):
+    print(f"loading function :", end=" ")  # logs -> print
+    function = ac_mod_.tools[ac_mod_.tools["all"][SUPER_SET.index(u[0].upper())][0]]  # builtin
+    print(Style.GREEN("🆗"))
+    print("test function signature", end=" ")
+
+    sig = signature(function)
+    params_len = len(sig.parameters)
+    if params_len == 0:
+        try:
+            print(Style.GREEN("🆗 ") + "\nStart function\n")
+            function()
+            print(Style.GREEN(f"\n-"))
+        except Exception as e:
+            print(Style.YELLOW(Style.Bold(f"! function ERROR : {e}")))
+    elif params_len == 1:
+        print(Style.GREEN("🆗 ") + "\nStart function\n")
+        function(u)
+        print(Style.GREEN(f"\n-"))
+    else:
+        print(Style.YELLOW(f"! to many args {params_len} def ...(u): | -> {str(sig)}"))
 
 
 def exit_all_modules():
@@ -258,35 +281,57 @@ def main(args):
     global AC_MOD, PREFIX, SUPER_SET, COMMAND_HISTORY
     run = True
 
+    remote = args[2] == "--remote"
+    command = args[2:]
+
     while run:
         print("\n" * 2)
-        user_hud_cmd()
+        user_hud_cmd()  # logs
         print("\n" * 1)
-        u = user_input(COMMAND_HISTORY)
+        if remote:
+            remote = False
+            u = command
+        else:
+            u = user_input(COMMAND_HISTORY)  # events(Key, Mise)
 
         # print("U:", u, len(u))
 
-        if len(u) == 0:
+        if len(u) == 0:  # error events(Err, 0dex)
             print("hey how did you do it this area is private :>")
 
-        elif u[0] == '':
+        elif u[0] == '':  # log(helper)
             print("Pleas enter a command or help for mor information")
 
-        elif u[0].lower() == '_hr':
-            if input("Do you to hot-reloade alle mods? (y/n): ") in ["y", "yes", "Y"]:
-                remove_all_modules()
-                default_load()
+        elif u[0].lower() == '_hr':  # builtin events(event(exit)->event(start)))
+            if input(f"Do you to hot-reloade {'alle mods' if len(u) <= 1 else u[1]}? (y/n): ") in ["y", "yes", "Y"]:
+                if len(u) == 2:
+                    if u[1] in MOD_LIST.keys():
+                        try:
+                            remove_mod(u[1])
+                        except Exception as e:
+                            print(Style.RED(f"Error removing module {u[1]}\nERROR:\n{e}"))
 
-        elif u[0].lower() == 'logs':
+                        try:
+                            lode_mod(load_welcome_page(u[1]))
+                        except Exception as e:
+                            print(Style.RED(f"Error adding module {u[1]}\nERROR:\n{e}"))
+
+                    else:
+                        print(f"Module not found {u[1]} |  is case sensitive")
+                else:
+                    remove_all_modules()
+                    default_load()
+
+        elif u[0].lower() == 'logs':  # logs(_)
             print(f"PREFIX={PREFIX}"
-                  f"\nMACRO={pretty_print(MACRO[:5])}"
-                  f"\nMODS={pretty_print(MACRO[5:])}"
+                  f"\nMACRO={pretty_print(MACRO[:7])}"
+                  f"\nMODS={pretty_print(MACRO[7:])}"
                   f"\nSUPER_SET={pretty_print(SUPER_SET)}")
             command_viewer(logs)
             print("HISTORY")
             command_viewer(COMMAND_HISTORY[len(COMMAND_HISTORY) - 4:])
 
-        elif u[0].upper() == "EXIT":
+        elif u[0].upper() == "EXIT":  # builtin events(exit)
             if input("Do you want to exit? (y/n): ") in ["y", "yes", "Y"]:
                 # command_viewer(COMMAND_HISTORY)
                 CLOUDM.save_history(COMMAND_HISTORY)
@@ -296,7 +341,7 @@ def main(args):
                 run = False
                 return
 
-        elif u[0].lower() == "help":
+        elif u[0].lower() == "help":  # logs(event(helper))
             if not AC_MOD and len(u) == 1:
                 print(f"All commands: {pretty_print(MACRO)} \nfor mor information type : help [command]")
             elif AC_MOD:
@@ -313,7 +358,7 @@ def main(args):
             else:
                 print(Style.RED(f"HELPER {pretty_print(u)} invalid syntax / command"))
 
-        elif u[0].upper() == 'LOAD-MOD':
+        elif u[0].upper() == 'LOAD-MOD':  # builtin events(event(cloudM(_)->event(Build)))
             if len(u) > 1:
                 try:
                     mod = load_welcome_page(u[1])
@@ -326,12 +371,22 @@ def main(args):
                 if system() == "Linux":
                     os.system("ls ./mods")
 
-        elif u[0] == '..':
+        elif u[0] == '..':  # builtin events(refresh)
             AC_MOD = None
             PREFIX = Style.CYAN(f"~{node()}@>")
             SUPER_SET = []
 
-        elif u[0].upper() in MOD_LIST.keys():
+        elif u[0] == 'test':  # builtin events(refresh)
+            if AC_MOD:
+                if u[0].upper() in SUPER_SET:
+                    COMMAND_HISTORY.append(u)  # logs(_)
+                    open_function_debug(u, AC_MOD)  # builtin(run - ac mod instance)
+                else:  # error(->(AC_MOD))
+                    print(Style.RED("function could not be found"))
+            else:
+                print(Style.RED("No module Active"))
+
+        elif u[0].upper() in MOD_LIST.keys():  # builtin events(_)
             COMMAND_HISTORY.append(u)
             AC_MOD = MOD_LIST[u[0].upper()]
             PREFIX = Style.CYAN(f"~{node()}:{Style.Bold(pretty_print([u[0].upper()]).strip())}{Style.CYAN('@>')}")
@@ -342,24 +397,25 @@ def main(args):
                 if u[1].upper() in SUPER_SET:
                     open_function(u[1:], AC_MOD)
 
-        elif AC_MOD:
+        elif AC_MOD:  # builtin events(AC_MOD(MOD))
             if u[0].upper() in SUPER_SET:
-                COMMAND_HISTORY.append(u)
-                open_function(u, AC_MOD)
-            else:
+                COMMAND_HISTORY.append(u)  # logs(_)
+                open_function(u, AC_MOD)  # builtin(run - ac mod instance)
+            else:  # error(->(AC_MOD))
                 print(Style.RED("function could not be found"))
 
-        else:
+        else:  # error(->)
             print(Style.YELLOW("[-] Unknown command:") + pretty_print(u))
 
 
 if __name__ == '__main__':
     # C:\Users\Markin\anaconda3\envs\ToolBoxV2\python.exe main.py
     os.system("")
-    MACRO = ['HELP', 'LOAD-MOD', 'LOGS', 'EXIT', '_hr', '..']
+    MACRO = ['HELP', 'LOAD-MOD', 'LOGS', 'EXIT', '_hr', '..', 'test']
     MACRO_color = {'HELP': 'GREEN',
                    'LOAD-MOD': 'BLUE',
                    'EXIT': 'RED',
+                   'test': 'YELLOW',
                    '..': 'MAGENTA',
                    'LOGS': 'MAGENTA'
                    }
@@ -375,7 +431,8 @@ if __name__ == '__main__':
                 'Brings u Back to Main']],
         'LOGS': [['Information', 'version : 0.1.0', 'color : MAGENTA', 'syntax : LOGS',
                   'show logs']],
-        '_hr': [['Information', 'version : ----', 'Hotreload all mods']]
+        '_hr': [['Information', 'version : ----', 'Hotreload all mods']],
+        'test': [['Test Function', 'version : ----', Style.RED('Code can crash')]]
     }
     PREFIX = Style.CYAN(f"~{node()}@>")
     logs = []
@@ -388,24 +445,12 @@ if __name__ == '__main__':
     INFO = lode_mod(load_welcome_page()).print_t
     CLOUDM = lode_mod(load_welcome_page("cloudM"))
     CLOUDM.lode_mods(load_welcome_page, lode_mod)
-##
     COMMAND_HISTORY = CLOUDM.load_history()
 
     print('\033[?25l', end="")
 
     main(sys.argv)
 
-
     print("\n\n\n\tEXIT")
     input("Press Enter to EXIT")
 
-
-
-# TODO Load modular Mods
-#   TODO Helper mods _supported DON
-#   TODO Interface mods _supported DON
-
-#   TODO Socket mods _supported
-#   TODO API mods _supported
-
-# TODO Web interface

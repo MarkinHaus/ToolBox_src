@@ -23,42 +23,42 @@ class MainTool:
         self.logs.append([self, "TOOL successfully loaded"])
 
     def print(self, message, *args, end="\n"):
-        print(Style.style_dic[self.color]+self.name + Style.style_dic["END"] + ":", message, *args, end=end)
+        print(Style.style_dic[self.color] + self.name + Style.style_dic["END"] + ":", message, *args, end=end)
 
 
 class Code:
     @staticmethod
     def decode_code(data):
-        #letters = string.ascii_letters + string.digits + string.punctuation
-        #decode_str = ''
-        #data_n = data.split('#')
-        #data = []
-        #for data_z in data_n[:-1]:
+        # letters = string.ascii_letters + string.digits + string.punctuation
+        # decode_str = ''
+        # data_n = data.split('#')
+        # data = []
+        # for data_z in data_n[:-1]:
         #    data.append(float(data_z))
-        #i = 0
-        #for data_z in data:
+        # i = 0
+        # for data_z in data:
         #    ascii_ = data_z * 2
         #    decode_str += letters[int(ascii_)]
         #    i += 1
-        #decode_str = decode_str.replace('-ou-', 'u')
-        #decode_str = decode_str.split('@')
-        #return decode_str
+        # decode_str = decode_str.replace('-ou-', 'u')
+        # decode_str = decode_str.split('@')
+        # return decode_str
         return data
 
     @staticmethod
     def encode_code(data):
-        #letters = string.ascii_letters + string.digits + string.punctuation
-        #encode_str = ''
-        #data = data.replace(' ', '@')
-        #leng = data.__len__()
-        #for data_st in range(leng):
+        # letters = string.ascii_letters + string.digits + string.punctuation
+        # encode_str = ''
+        # data = data.replace(' ', '@')
+        # leng = data.__len__()
+        # for data_st in range(leng):
         #    i = -1
         #    while data[data_st] != letters[i]:
         #        i += 1
         #        if data[data_st] == letters[i]:
         #            encode_str += str(i / 2) + '#'
         #    data_st += 1
-        #return encode_str
+        # return encode_str
         return data
 
 
@@ -76,13 +76,13 @@ class FileHandler(Code):
         if self.file_handler_storage:
             self.file_handler_storage.close()
         try:
-            self.file_handler_storage = open(self.file_handler_file_prefix+self.file_handler_filename, mode)
+            self.file_handler_storage = open(self.file_handler_file_prefix + self.file_handler_filename, mode)
         except FileNotFoundError:
             print(Style.RED(f"File not found: {self.file_handler_file_prefix}{self.file_handler_filename}"))
             if input("Do you want to create this path | file ? (y/n) ") in ['y', 'yes', 'Y']:
                 if not os.path.exists(f"{self.file_handler_file_prefix}"):
                     os.makedirs(f"{self.file_handler_file_prefix}")
-                open(self.file_handler_file_prefix+self.file_handler_filename, 'a').close()
+                open(self.file_handler_file_prefix + self.file_handler_filename, 'a').close()
                 print("File created successfully")
                 rdu()
             else:
@@ -92,9 +92,11 @@ class FileHandler(Code):
 
     def open_s_file_handler(self):
         self.open_file_handler('w+', self.open_s_file_handler)
+        return self
 
     def open_l_file_handler(self):
         self.open_file_handler('r+', self.open_l_file_handler)
+        return self
 
     def save_file_handler(self):
         for pos, data in enumerate(self.file_handler_auto_save.keys()):
@@ -105,6 +107,8 @@ class FileHandler(Code):
         for line in self.file_handler_save:
             self.file_handler_storage.write(line)
             self.file_handler_storage.write('\n')
+
+        return self
 
     def add_to_save_file_handler(self, key: str, value: str):
         if len(key) != 10:
@@ -126,7 +130,7 @@ class FileHandler(Code):
             append = [heda, enc]
             self.file_handler_auto_save[heda] = True
             self.file_handler_load.append(append)
-        return self.file_handler_load
+        return self
 
     def set_auto_save_file_handler(self, key: str):
         self.file_handler_auto_save[key] = False
