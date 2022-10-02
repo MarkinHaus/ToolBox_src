@@ -413,11 +413,11 @@ def main(args):
 if __name__ == '__main__':
     # C:\Users\Markin\anaconda3\envs\ToolBoxV2\python.exe main.py
     os.system("")
-    MACRO = ['HELP', 'LOAD-MOD', 'LOGS', 'EXIT', '_hr', '..', 'test']
+    MACRO = ['HELP', 'LOAD-MOD', 'LOGS', 'EXIT', '_hr', '..', 'TEST']
     MACRO_color = {'HELP': 'GREEN',
                    'LOAD-MOD': 'BLUE',
                    'EXIT': 'RED',
-                   'test': 'YELLOW',
+                   'TEST': 'YELLOW',
                    '..': 'MAGENTA',
                    'LOGS': 'MAGENTA'
                    }
@@ -434,7 +434,7 @@ if __name__ == '__main__':
         'LOGS': [['Information', 'version : 0.1.0', 'color : MAGENTA', 'syntax : LOGS',
                   'show logs']],
         '_hr': [['Information', 'version : ----', 'Hotreload all mods']],
-        'test': [['Test Function', 'version : ----', Style.RED('Code can crash')]]
+        'TEST': [['Test Function', 'version : ----', Style.RED('Code can crash')]]
     }
     PREFIX = Style.CYAN(f"~{node()}@>")
     logs = []

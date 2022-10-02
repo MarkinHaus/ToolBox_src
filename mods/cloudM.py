@@ -31,6 +31,8 @@ class Tools(MainTool, FileHandler):
                     ["download", "download a mod from MarkinHaus server", "add is case sensitive"],
                     ["#update", "update a mod from MarkinHaus server ", Style.RED("NOT IMPLEMENTED"),
                      "add is case sensitive"],
+                    ["#update-core", "update ToolBox from MarkinHaus server ", Style.RED("NOT IMPLEMENTED"),
+                     "add is case sensitive"],
                     ["upload", "upload a mod to MarkinHaus server", "add is case sensitive"],
                     ["first-web-connection", "set up a web connection to MarkinHaus"],
                     ["create-account", "create a new account"],
@@ -357,3 +359,8 @@ class Tools(MainTool):  # FileHandler
                 self.print(Style.RED(f"ERROR: {error}"))
         else:
             self.print(Style.RED(f"ERROR: {input_} len {len(input_)} != 3"))
+
+    def update_core(self):
+        self.print("Exit and")
+        self.print("git pull https://github.com/MarkinHaus/ToolBoxV2")
+
