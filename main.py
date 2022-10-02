@@ -280,9 +280,11 @@ def default_load():
 def main(args):
     global AC_MOD, PREFIX, SUPER_SET, COMMAND_HISTORY
     run = True
-
-    remote = args[2] == "--remote"
-    command = args[2:]
+    remote = False
+    command = []
+    if len(args) >= 3:
+        remote = args[2] == "--remote"
+        command = args[2:]
 
     while run:
         print("\n" * 2)
