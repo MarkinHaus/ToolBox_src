@@ -62,7 +62,7 @@ class Tools(MainTool, FileHandler):
         self.get_version()
 
     def on_exit(self):
-        self.add_to_save_file_handler(self.keys["DM"], str(self.add))
+        self.add_to_save_file_handler(self.keys["DM"], str(list(set(self.add))))
         self.open_s_file_handler()
         self.save_file_handler()
         self.file_handler_storage.close()
@@ -86,7 +86,7 @@ class Tools(MainTool, FileHandler):
 
         self.print("Version: %s" % self.version)
 
-    def lode_mods(self, get_mod, set_info):
+    def load_mods(self, load_mod):
         default_modules = self.get_file_handler(self.keys["DM"])
 
         if default_modules:
@@ -102,9 +102,11 @@ class Tools(MainTool, FileHandler):
                 self.add.append(i)
                 self.print(f"Loading module : ", end='')
                 try:
-                    set_info(get_mod(i))
+                    load_mod(i)
+                    self.log(f"Open mod {i}")
                 except Exception as e:
                     print(Style.RED("Error") + f" loading modules : {e}")
+                    self.log(f"Error mod {i}")
 
     def load_history(self):
         history = self.get_file_handler(self.keys["HIS"])

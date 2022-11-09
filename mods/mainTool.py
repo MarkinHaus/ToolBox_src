@@ -1,5 +1,8 @@
 import os
-import string
+from platform import node
+from importlib import import_module
+from inspect import signature
+
 from Style import Style
 
 
@@ -16,7 +19,7 @@ class MainTool:
     def load(self, todo):
         if todo:
             todo()
-            self.logs.append([self, "load successfull"])
+            self.logs.append([self, "load successfully"])
         else:
             self.logs.append([self, "no load require"])
         print(f"TOOL successfully loaded : {self.name}")
@@ -24,6 +27,9 @@ class MainTool:
 
     def print(self, message, *args, end="\n"):
         print(Style.style_dic[self.color] + self.name + Style.style_dic["END"] + ":", message, *args, end=end)
+
+    def log(self, message):
+        self.logs.append([self, message])
 
 
 class Code:
@@ -143,3 +149,264 @@ class FileHandler(Code):
             if obj == objects[0]:
                 return objects[1]
         return None
+
+
+class App:
+    def __init__(self, config_filename="tb.config"):
+
+        self.config_fh = FileHandler(config_filename)
+        self.config_fh.open_l_file_handler()
+        self.config_fh.load_file_handler()
+
+        self.keys = {
+            "MACRO": "macro~~~~:",
+            "MACRO_C": "m_color~~:",
+            "HELPER": "helper~~~:",
+            "debug": "debug~~~~:",
+        }
+
+        self.MACRO = self.get_config_data("MACRO", [])
+        self.MACRO_color = self.get_config_data("MACRO_C", {})
+        self.HELPER = self.get_config_data("HELPER", {})
+
+        self.PREFIX = Style.CYAN(f"~{node()}@>")
+        self.MOD_LIST = {}
+        self.logs_ = []
+        self.SUPER_SET = []
+        # self.spec = []
+        self.AC_MOD = None
+        self.alive = True
+        self.debug = True  # self.get_config_data("debug", False)
+
+        print("SYSTEM :; " + node())
+
+    def get_config_data(self, key, t):
+        data = self.config_fh.get_file_handler(self.keys[key])
+        if data is not None:
+            try:
+                return eval(data)
+            except ValueError:
+                print(f"Error Loading {key}")
+        return t
+
+    def load_mod(self, filename):
+        mod = import_module("mods." + filename)
+        mod = getattr(mod, "Tools")
+
+        mod = mod(logs=self.logs_)
+        mod_name = mod.name
+        self.MOD_LIST[mod_name.upper()] = mod
+        color = mod.color if mod.color else "WHITE"
+        self.MACRO.append(mod_name.upper())
+        self.MACRO_color[mod_name.upper()] = color
+        self.HELPER[mod_name.upper()] = mod.tools["all"]
+
+        # for spec, _ in mod.tools["all"]:
+        #     self.spec.append(mod_name.upper() + "-" + spec.upper())
+
+        return mod
+
+    def remove_all_modules(self):
+        iter_list = self.MOD_LIST.copy()
+
+        self.exit_all_modules()
+
+        for mod_name in iter_list.keys():
+            try:
+                self.remove_mod(mod_name)
+            except Exception as e:
+                print(Style.RED("ERROR: %s %e" % mod_name % e))
+
+    def exit_all_modules(self):
+        for mod in self.MOD_LIST.items():
+            print("closing:", mod[0], ": ", end="")
+            if mod[1]._on_exit:
+                try:
+                    mod[1]._on_exit()
+                    print(Style.GREEN(Style.Bold(f"🆗")))
+                except Exception as e:
+                    print(Style.YELLOW(Style.Bold(f"closing ERROR : {e}")))
+
+    def remove_mod(self, mod_name):
+        del self.MOD_LIST[mod_name.upper()]
+        del self.MACRO_color[mod_name.upper()]
+        del self.HELPER[mod_name.upper()]
+        self.MACRO.remove(mod_name.upper())
+
+    def colorize(self, obj):
+        for pos, o in enumerate(obj):
+            if o.upper() in self.MACRO:
+                if o.upper() in self.MACRO_color.keys():
+                    obj[pos] = f"{Style.style_dic[self.MACRO_color[o.upper()]]}{o}{Style.style_dic['END']}"
+        return obj
+
+    def pretty_print(self, obj: list):
+        obj_work = obj.copy()
+        obj_work = self.colorize(obj_work)
+        s = ""
+        for i in obj_work:
+            s += str(i) + " "
+        return s
+
+    def autocompletion(self, command):
+        options = []
+        if command == "":
+            return options
+        for macro in self.MACRO + self.SUPER_SET:
+            if macro.startswith(command.upper()):
+                options.append(macro)
+
+        return options
+
+    def logs(self):
+        print(f"PREFIX={self.PREFIX}"
+              f"\nMACRO={self.pretty_print(self.MACRO[:7])}"
+              f"\nMODS={self.pretty_print(self.MACRO[7:])}"
+              f"\nSUPER_SET={self.pretty_print(self.SUPER_SET)}")
+        self.command_viewer(self.logs_)
+
+    def exit(self):
+        self.exit_all_modules()
+        print(Style.Bold(Style.CYAN("OK - EXIT ")))
+        print('\033[?25h', end="")
+        self.alive = False
+        self.config_fh.open_s_file_handler()
+        self.config_fh.save_file_handler()
+        self.config_fh.file_handler_storage.close()
+
+    def help(self, command: str):
+        if not self.AC_MOD and command == "":
+            print(f"All commands: {self.pretty_print(self.MACRO)} \nfor mor information type : help [command]")
+            return "intern-error"
+        elif self.AC_MOD:
+            print(Style.Bold(self.AC_MOD.name))
+            self.command_viewer(self.AC_MOD.tools["all"])
+            return self.AC_MOD.tools["all"]
+
+        elif command.upper() in self.HELPER.keys():
+            helper = self.HELPER[command.upper()]
+            print(Style.Bold(command.upper()))
+            self.command_viewer(helper)
+            return helper
+        else:
+            print(Style.RED(f"HELPER {command} is not a valid | valid commands ar"
+                            f" {self.pretty_print(list(self.HELPER.keys()))}"))
+            return "invalid commands"
+
+    def save_load(self, filename):
+        if self.debug:
+            return self.load_mod(filename)
+        try:
+            return self.load_mod(filename)
+        except ModuleNotFoundError:
+            print(Style.RED(f"Module {filename} not found"))
+
+    def reset(self):
+        self.AC_MOD = None
+        self.PREFIX = Style.CYAN(f"~{node()}@>")
+        self.SUPER_SET = []
+
+    def _get_function(self, name):
+        if not self.AC_MOD:
+            self.debug_print(Style.RED("No module Active"))
+            return None
+        if self.debug:
+            return self.AC_MOD.tools[self.AC_MOD.tools["all"][self.SUPER_SET.index(name.upper())][0]]
+        try:
+            return self.AC_MOD.tools[self.AC_MOD.tools["all"][self.SUPER_SET.index(name.upper())][0]]
+        except KeyError as e:
+            print(Style.RED(f"KeyError: {e} function not found 404"))
+            return None
+
+    def run_function(self, name, command):
+        # get function
+        function = self._get_function(name)
+        res = {}
+        if not function:
+            print(Style.RED(f"Function {name} not found"))
+            return False
+        # signature function
+        sig = signature(function)
+        args = len(sig.parameters)
+
+        if args == 0:
+            if self.debug:
+                res = function()
+            else:
+                try:
+                    print(Style.GREEN("🆗 ") + "\nStart function\n")
+                    res = function()
+                    print(Style.GREEN(f"\n-"))
+                except Exception as e:
+                    print(Style.YELLOW(Style.Bold(f"! function ERROR : {e}")))
+
+        elif args == 1:
+            if self.debug:
+                res = function(command)
+            else:
+                try:
+                    print(Style.GREEN("🆗 ") + "\nStart function\n")
+                    res = function(command)
+                    print(Style.GREEN(f"\n-"))
+                except Exception as e:
+                    print(Style.YELLOW(Style.Bold(f"! function ERROR : {e}")))
+
+        elif args == 2:
+            if self.debug:
+                res = function(command, self)
+            else:
+                try:
+                    print(Style.GREEN("🆗 ") + "\nStart function\n")
+                    res = function(command, self)
+                    print(Style.GREEN(f"\n-"))
+                except Exception as e:
+                    print(Style.YELLOW(Style.Bold(f"! function ERROR : {e}")))
+        else:
+            self.debug_print(Style.YELLOW(f"! to many args {args} def ...(u): | -> {str(sig)}"))
+
+        if self.debug:
+            print(res)
+
+        return res
+
+    def set_spec(self):
+        for spec in self.AC_MOD.tools["all"]:
+            self.SUPER_SET.append(spec[0].upper())
+
+    def new_ac_mod(self, name):
+        self.AC_MOD = self.MOD_LIST[name.upper()]
+        self.PREFIX = Style.CYAN(
+            f"~{node()}:{Style.Bold(self.pretty_print([name.upper()]).strip())}{Style.CYAN('@>')}")
+        self.set_spec()
+
+    def save_exit(self):
+
+        self.config_fh.add_to_save_file_handler(self.keys["HELPER"], str(self.HELPER))
+        self.config_fh.add_to_save_file_handler(self.keys["MACRO"], str(self.MACRO))
+        self.config_fh.add_to_save_file_handler(self.keys["MACRO_C"], str(self.MACRO_color))
+        self.config_fh.add_to_save_file_handler(self.keys["debug"], str(self.debug))
+
+    def debug_print(self, message, *args, end="\n"):
+        if self.debug:
+            print(message, *args, end=end)
+
+    @staticmethod
+    def command_viewer(mod_command):
+        mod_command_names = []
+        mod_command_dis = []
+        print(f"\n")
+        for msg in mod_command:
+            if msg[0] not in mod_command_names:
+                mod_command_names.append(msg[0])
+                mod_command_dis.append([])
+
+            for dis in msg[1:]:
+                mod_command_dis[mod_command_names.index(msg[0])].append(dis)
+
+        for tool_address in mod_command_names:
+            print(Style.GREEN(f"{tool_address}, "))
+            for log_info in mod_command_dis[mod_command_names.index(tool_address)]:
+                print(Style.YELLOW(f"    {log_info}"))
+            print("\n")
+
+        return mod_command_names
