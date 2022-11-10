@@ -61,7 +61,7 @@ def user_input(app):
             else:
                 command += str(key, "ISO-8859-1")
 
-        options = app.autocompletion(command)
+        options = list(set(app.autocompletion(command)))
 
         if helper_index > len(options) - 1:
             helper_index = 0
@@ -124,7 +124,7 @@ def main(app, img):
 
         elif command[0].upper() == "EXIT":  # builtin events(exit)
             if input("Do you want to exit? (y/n): ") in ["y", "yes", "Y"]:
-                app.save_exit()
+                # app.save_exit()
                 app.exit()
 
         elif command[0].lower() == "help":  # logs(event(helper))
@@ -218,3 +218,20 @@ if __name__ == '__main__':
 #        '_hr': [['Information', 'version : ----', 'Hotreload all mods']],
 #        'TEST': [['Test Function', 'version : ----', Style.RED('Code can crash')]]
 #    }
+#       helper~~~:{'HELP': [['Information', 'version : 0.1.0', 'color : GREEN',
+#       'syntax : help [command]', 'help is available in all subsets']],
+#       'LOAD-MOD': [['Information', 'version : 0.1.0', 'color : BLUE',
+#       'syntax : LOAD-MOD [filename]', 'file must be in mods folder ']],
+#       'EXIT': [['Information', 'version : 0.1.0', 'color : RED',
+#       'syntax : EXIT', 'The only way to exit in TOOL BOX']],
+#       '..': [['Information', 'version : 0.1.0', 'color : MAGENTA',
+#       'syntax : ..', 'Brings u Back to Main']], 'LOGS': [['Information',
+#       'version : 0.1.0', 'color : MAGENTA', 'syntax : LOGS', 'show logs']],
+#       '_hr': [['Information', 'version : ----', 'Hotreload all mods']]}
+#       macro~~~~:['HELP', 'LOAD-MOD', 'LOGS', 'EXIT', '_hr', '..', 'CLS']
+#       m_color~~:{'HELP': 'GREEN', 'LOAD-MOD': 'BLUE', 'EXIT': 'RED', 'CLS': 'YELLOW',
+#       '..': 'MAGENTA', 'LOGS': 'MAGENTA'}
+#       debug~~~~:True
+#
+#
+

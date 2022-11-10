@@ -1,9 +1,33 @@
 from mods.mainTool import App
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from typing import Union
 import sys
+import time
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+origins = [
+    "http://127.0.0.1:8080",
+    "http://localhost:8080",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+@app.middleware("http")
+async def add_process_time_header(request: Request, call_next):
+    start_time = time.time()
+    response = await call_next(request)
+    process_time = time.time() - start_time
+    response.headers["X-Process-Time"] = str(process_time)
+    return response
 
 
 @app.get("/")
@@ -82,7 +106,6 @@ if __name__ == 'api':
             config_file = d[1]
             name = d[2]
 
-    config_file = "api.config"
     tb_app = App(config_file)
     tb_img = tb_app.save_load("welcome").print_a
     tb_img()

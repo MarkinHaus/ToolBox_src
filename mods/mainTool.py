@@ -370,6 +370,7 @@ class App:
         return res
 
     def set_spec(self):
+        self.SUPER_SET = []
         for spec in self.AC_MOD.tools["all"]:
             self.SUPER_SET.append(spec[0].upper())
 
