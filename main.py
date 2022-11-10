@@ -158,6 +158,10 @@ def main(app, img):
             mode = 'live'
             app.debug = False
 
+        elif command[0] == 'auto-save':
+            app.auto_save = not app.auto_save
+            print('auto-save', app.auto_save)
+
         elif command[0] == 'debug':
             mode = 'debug'
             app.debug = True

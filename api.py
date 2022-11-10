@@ -36,6 +36,12 @@ def read_item():
     return {"result": result}
 
 
+@app.get("/exit")
+def read_item():
+    tb_app.exit()
+    return {"exit": exit(0)}
+
+
 @app.get("/mod-list")
 def read_item():
     return {"mod-list": list(tb_app.MOD_LIST.keys())}

@@ -108,3 +108,4 @@ class Tools(MainTool, FileHandler):  # FileHandler
         self.open_s_file_handler()
         self.save_file_handler()
         self.file_handler_storage.close()
+

@@ -32,6 +32,7 @@ class MainTool:
         self.logs.append([self, message])
 
 
+
 class Code:
     @staticmethod
     def decode_code(data):
@@ -163,12 +164,15 @@ class App:
             "MACRO_C": "m_color~~:",
             "HELPER": "helper~~~:",
             "debug": "debug~~~~:",
+            "id": "name-spa~:",
         }
 
         self.MACRO = self.get_config_data("MACRO", [])
         self.MACRO_color = self.get_config_data("MACRO_C", {})
         self.HELPER = self.get_config_data("HELPER", {})
 
+        self.id = self.get_config_data("id", config_filename)
+        self.auto_save = True
         self.PREFIX = Style.CYAN(f"~{node()}@>")
         self.MOD_LIST = {}
         self.logs_ = []
@@ -188,6 +192,19 @@ class App:
             except ValueError:
                 print(f"Error Loading {key}")
         return t
+
+    #def pre_lib_mod(self, filename):
+    #    lib_mod_dir = ""
+#
+    #    mod_file = open(f"mods/{filename}.py", "rb").read()
+#
+    #    if not os.path.exists(f"./runtime/{self.id}/mod_lib"):
+    #        os.makedirs(f"./runtime/{self.id}/mod_lib")
+    #    open(self.file_handler_file_prefix + self.file_handler_filename, 'a').close()
+    #
+    #    open()
+#
+    #    return lib_mod_dir
 
     def load_mod(self, filename):
         mod = import_module("mods." + filename)
@@ -366,6 +383,12 @@ class App:
 
         if self.debug:
             print(res)
+
+        print(f"Name: {self.id} : {__name__}")
+
+        if __name__ == "mods.mainTool" and self.auto_save:
+            self.AC_MOD.on_exit()
+            self.AC_MOD.on_start()
 
         return res
 

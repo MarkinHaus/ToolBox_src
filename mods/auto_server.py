@@ -25,6 +25,7 @@ class Tools(MainTool, FileHandler):
                     ["set", "set"],
                     ["set-server", "set-server"],
                     ["build", "Build"],
+                    ["upload", "upload"],
                     ["test", "test"],
                     ["hotfix", "Hotfix"]],
             "name": "auto_server",
@@ -34,6 +35,7 @@ class Tools(MainTool, FileHandler):
             "set": self.set,
             "set-server": self.set_server,
             "build": self.build,
+            "upload": self.upload,
             "test": self.test,
             "hotfix": self.hotfix,
         }
@@ -60,14 +62,10 @@ class Tools(MainTool, FileHandler):
         self.file_handler_storage.close()
 
     def install(self, command, app: App):
-        if len(command) >= 0:
-            return f"invalid command len {len(command)} "
 
         os.system("tar -xvzf ../app.tar.gz")
 
     def run(self, command, app: App):
-        if len(command) >= 0:
-            return f"invalid command len {len(command)} "
 
         if "-bg" in command:
 
@@ -120,8 +118,22 @@ class Tools(MainTool, FileHandler):
             self.build("Simpel MHS-server -upload", app)
 
     def build(self, command, app: App):
-        if len(command) >= 0:
-            return f"invalid command len {len(command)} "
+
+        if "Simpel" in command:
+            print("building Simpel")
+            if "Simpel:src" not in list(self.defaults.keys()):
+                return {"error": "Simpel:src not found"}
+            src = self.defaults["Simpel:src"]
+            build_simpel(src)
+
+        if "MHS-server" in command:
+            print("building MHS-server")
+            if "MHS:src" not in list(self.defaults.keys()):
+                return {"error": "MHS:src not found"}
+            src = self.defaults["MHS:src"]
+            build_mhs(src)
+
+    def upload(self, command, app: App):
 
         if "Server:pwd" not in list(self.defaults.keys()):
             return {"error": "Server:pwd not found"}
@@ -138,24 +150,19 @@ class Tools(MainTool, FileHandler):
         ip = self.defaults["Server:ip"]
 
         if "Simpel" in command:
-            print("building Simpel")
             if "Simpel:src" not in list(self.defaults.keys()):
                 return {"error": "Simpel:src not found"}
             src = self.defaults["Simpel:src"]
-            build_simpel(src)
-            if "-upload" in command:
-                print("uploading Simpel")
-                upload_simpel(pwd, user, ip, des_path)
+            print("uploading Simpel")
+            upload_simpel(src, pwd, user, ip, des_path)
 
         if "MHS-server" in command:
-            print("building MHS-server")
             if "MHS:src" not in list(self.defaults.keys()):
                 return {"error": "MHS:src not found"}
             src = self.defaults["MHS:src"]
-            build_mhs(src)
-            if "-upload" in command:
-                print("uploading MHS-server")
-                upload_mhs(pwd, user, ip, des_path)
+
+            print("uploading MHS-server")
+            upload_mhs(src, pwd, user, ip, des_path)
 
     def test(self, command, _app: App):
 
@@ -177,7 +184,7 @@ class Tools(MainTool, FileHandler):
         if len(command) <= 0:
             return f"invalid command len {len(command)} "
 
-        self.defaults[command[1]] = command[0]
+        self.defaults[command[1]] = command[2]
 
         # root@45.79.251.173:/home/MarkinHaus/runtime
 
@@ -196,7 +203,7 @@ class Tools(MainTool, FileHandler):
 
 def cd_raper(function):
     def wrapper(*args, **kwargs):
-        cd = check_output("cd", shell=True, universal_newlines=True)
+        cd = os.getcwd()
         function(*args, **kwargs)
         os.chdir(cd)
 
@@ -245,12 +252,13 @@ def build_mhs(src):
 
 
 @cd_raper
-def upload_mhs(pwd, user, ip, des_path):
-    os.system("tar cfvz app.tar.gz ./app")
-    os.system(f'sshpass -p "{pwd}" scp -r {user}@{ip}:{des_path} markin_haus_service ')
+def upload_mhs(src, pwd, user, ip, des_path):
+    os.chdir(src)
+    os.system(f'sshpass -p "{pwd}" scp -r {user}@{ip}:{des_path} markin_haus_service')
 
 
 @cd_raper
-def upload_simpel(pwd, user, ip, des_path):
+def upload_simpel(src, pwd, user, ip, des_path):
+    os.chdir(src)
     os.system("tar cfvz app.tar.gz ./app")
     os.system(f'sshpass -p "{pwd}" scp -r {user}@{ip}:{des_path} ./app.tar.gz')
