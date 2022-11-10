@@ -13,12 +13,13 @@ class MainTool:
         self.name = kwargs["name"]
         self.logs = kwargs["logs"]
         self.color = kwargs["color"]
-        self.load(kwargs["load"])
+        self.todo = kwargs["load"]
         self._on_exit = kwargs["on_exit"]
+        self.load()
 
-    def load(self, todo):
-        if todo:
-            todo()
+    def load(self):
+        if self.todo:
+            self.todo()
             self.logs.append([self, "load successfully"])
         else:
             self.logs.append([self, "no load require"])
@@ -387,8 +388,8 @@ class App:
         print(f"Name: {self.id} : {__name__}")
 
         if __name__ == "mods.mainTool" and self.auto_save:
-            self.AC_MOD.on_exit()
-            self.AC_MOD.on_start()
+            self.AC_MOD._on_exit()
+            self.AC_MOD.load()
 
         return res
 
