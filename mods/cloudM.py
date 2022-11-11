@@ -1,11 +1,16 @@
-import os
 import threading
 
-from mods.mainTool import MainTool, FileHandler
+from mods.mainTool import MainTool, FileHandler, App
 from Style import Style
 from importlib import import_module
 from pathlib import Path
 import requests
+import hashlib, binascii, os
+
+import uuid
+
+from datetime import datetime, timedelta, timezone
+import jwt
 
 
 class Tools(MainTool, FileHandler):
@@ -36,7 +41,11 @@ class Tools(MainTool, FileHandler):
                     ["upload", "upload a mod to MarkinHaus server", "add is case sensitive"],
                     ["first-web-connection", "set up a web connection to MarkinHaus"],
                     ["create-account", "create a new account"],
-                    ["login", "login with Username & password"]
+                    ["login", "login with Username & password"],
+                    ["create_user", "create a new user - api instance"],
+                    ["validate_jwt", "validate a  user - api instance"],
+                    ["log_in_user", "log_in user - api instance"],
+                    ["download_api_files", "download mods"],
                     ],
             "name": "cloudM",
             "Version": self.show_version,
@@ -49,6 +58,10 @@ class Tools(MainTool, FileHandler):
             "first-web-connection": self.add_url_con,
             "create-account": self.create_account,
             "login": self.log_in,
+            "create_user": self.create_user,
+            "log_in_user": self.log_in_user,
+            "validate_jwt": self.validate_jwt,
+            "download_api_files": self.download_api_files,
         }
 
         FileHandler.__init__(self, "modules.config")
@@ -67,19 +80,21 @@ class Tools(MainTool, FileHandler):
         self.save_file_handler()
         self.file_handler_storage.close()
 
-    def show_version(self):
+    def show_version(self, command):
+        self.print(command)
         self.print("Version: ", self.version)
+        return self.version
 
     def get_version(self):
         version_command = self.get_file_handler(self.keys["URL"])
-        url = "http://127.0.0.1:8081/cloudM/version"
+        url = f"http://127.0.0.1:5000/get/cloudm/run/Version?command=V:{self.version}"
         if version_command is not None:
-            url = version_command + "/cloudM/version"
+            url = version_command + "/get/cloudm/run/Version?command=V:"+f"{self.version=}"
 
         self.print(url)
 
         try:
-            self.version = requests.get(url).json()["version"]
+            self.version = requests.get(url).json()["res"]
         except Exception:
             self.print(Style.RED("Error retrieving version information "
                                  "\n\tplease check your command : cloudM first-web-connection"))
@@ -105,7 +120,7 @@ class Tools(MainTool, FileHandler):
                     load_mod(i)
                     self.log(f"Open mod {i}")
                 except Exception as e:
-                    print(Style.RED("Error") + f" loading modules : {e}")
+                    self.print(Style.RED("Error") + f" loading modules : {e}")
                     self.log(f"Error mod {i}")
 
     def load_history(self):
@@ -218,33 +233,23 @@ class Tools(MainTool):  # FileHandler
 
     def upload(self, input_):
         version_command = self.get_file_handler(self.keys["URL"])
-        url = "http://127.0.0.1:8081/cloudM/upload"
+        url = "http://127.0.0.1:8081/upload-file"
         if version_command is not None:
-            url = version_command + "/cloudM/upload"
+            url = version_command + "/upload-file"
         try:
-            if len(input_) == 3:
-                type_ = input_[1]
-                name = input_[2]
-
-                if not (type_ in ["mod", "aug", "text"]):
-                    self.print((Style.YELLOW(f"SyntaxError : invalid type: {type_}  accept ar : [mod|aug|text]")))
-                    return
-
-                index = ["mod", "aug", "text"].index(type_)
-
-                server_type = ["application/mod", "application/aug", "text/*"][index]
-                path = ["mods/", "aug/", "text/"][index]
-
+            if len(input_) >= 2:
+                name = input_[1]
+                os.system("cd")
                 try:
-                    file = open(path + name, "rb").read()
+                    file = open("/mod/"+name + ".py", "rb").read()
                 except IOError:
-                    self.print((Style.RED(f"File does not exist or is not readable: {path + name}")))
+                    self.print((Style.RED(f"File does not exist or is not readable: ./mod/{name}.py")))
                     return
 
                 if file:
                     data = {"filename": name,
                             "data": str(file, "utf-8"),
-                            "content_type": server_type
+                            "content_type": "file/py"
                             }
 
                     try:
@@ -263,38 +268,27 @@ class Tools(MainTool):  # FileHandler
                         self.print(Style.RED(f"Error uploading (connoting to server) : {e}"))
 
             else:
-                self.print((Style.YELLOW(f"SyntaxError : upload [mod|aug|text] filename {input_}")))
+                self.print((Style.YELLOW(f"SyntaxError : upload filename {input_}")))
         except Exception as e:
             self.print(Style.RED(f"Error uploading : {e}"))
             return
 
     def download(self, input_):
         version_command = self.get_file_handler(self.keys["URL"])
-        url = "http://127.0.0.1:8081/cloudM/static"
+        url = "http://127.0.0.1:8081/get/cloudm/run/download_api_files?command="
         if version_command is not None:
-            url = version_command + "/cloudM/static"
+            url = version_command + "/get/cloudm/run/download_api_files?command=DB"
         try:
-            if len(input_) == 3:
-                type_ = input_[1]
-                name = input_[2]
+            if len(input_) >= 2:
+                name = input_[1]
 
-                if not (type_ in ["mod", "aug", "text"]):
-                    self.print((Style.YELLOW(f"SyntaxError : invalid type: {type_}  accept ar : [mod|aug|text]")))
-                    return
-
-                index = ["mod", "aug", "text"].index(type_)
-
-                path = ["/mods/", "/aug/", "/text/"][index]
-
-                url += path + name
+                url += name + ".py"
 
                 try:
-                    r = requests.get(url)
-                    self.print(r.status_code)
-                    filename = r.headers["content-disposition"].split('"')[-2]
-                    open("." + path + filename, "a").write(str(r.content, "utf-8"))
-                    self.print("saved temp file to: " + "." + path + filename)
-                    self.print("file size: " + r.headers["content-length"])
+                    data = requests.get(url).json()["res"]
+                    self.version = requests.get(url).json()["res"]
+                    open("./mods/" + name, "a").write(str(data, "utf-8"))
+                    self.print("saved file to: " + "./mods" + name)
 
                 except Exception as e:
                     self.print(Style.RED(f"Error download (connoting to server) : {e}"))
@@ -304,6 +298,14 @@ class Tools(MainTool):  # FileHandler
         except Exception as e:
             self.print(Style.RED(f"Error download : {e}"))
             return
+
+    def download_api_files(self, command):
+        filename = command[0]
+        if ".." in filename:
+            return "invalid command"
+
+        return open("./mods/"+filename, "rb").read()
+
 
     def add_url_con(self):
         """
@@ -345,7 +347,7 @@ class Tools(MainTool):  # FileHandler
             if not error:
                 claims = token.split(".")[1]
                 import base64
-                json_claims = base64.b64decode(claims+'==')
+                json_claims = base64.b64decode(claims + '==')
                 claims = eval(str(json_claims, 'utf-8'))
                 self.print(Style.GREEN(f"Welcome : {claims['username']}"))
                 self.print(Style.GREEN(f"Email : {claims['email']}"))
@@ -366,3 +368,147 @@ class Tools(MainTool):  # FileHandler
         self.print("Exit and")
         self.print("git pull https://github.com/MarkinHaus/ToolBoxV2")
 
+    def create_user(self, command, app: App):
+        if "DB" not in list(app.MOD_LIST.keys()):
+            return "Server has no database module"
+
+        data = command[0].data
+
+        print(data)
+
+        username = data["username"]
+        email = data["email"]
+        password = data["password"]
+
+        uid = str(uuid.uuid4())
+
+        tb_token_jwt = app.MOD_LIST["DB"].tools["get"](["jwt-secret-cloudMService"], app)
+
+        if not tb_token_jwt:
+            return "jwt - not found pleas register one"
+
+        if self.test_if_exists(username, app):
+            return "username already exists"
+
+        if self.test_if_exists(email, app):
+            return "email already exists"
+        jwt_key = crate_sing_key(username, email, password, uid, gen_token_time({}, 4380), tb_token_jwt, app)
+        app.MOD_LIST["DB"].tools["set"](["", f"user::{username}::{email}::{uid}", jwt_key])
+        return jwt_key
+
+    def log_in_user(self, command, app: App):
+        if "DB" not in list(app.MOD_LIST.keys()):
+            return "Server has no database module"
+
+        data = command[0].data
+        token = command[0].token
+
+        username = data["username"]
+        password = data["password"]
+
+        tb_token_jwt = app.MOD_LIST["DB"].tools["get"](["jwt-secret-cloudMService"], app)
+
+        if not tb_token_jwt:
+            return "jwt - not found pleas register one"
+
+        user_data: dict = validate_jwt(token, str(tb_token_jwt, "utf-8"), app.id)
+
+        if type(user_data) is str:
+            return user_data
+
+        if "username" not in list(user_data.keys()):
+            return "invalid Token"
+
+        if "password" not in list(user_data.keys()):
+            return "invalid Token"
+
+        t_username = user_data["username"]
+        t_password = user_data["password"]
+
+        if t_username != username:
+            return "username does not match"
+
+        if not verify_password(t_password, password):
+            return "invalid Password"
+
+        self.print("user login successful : ", t_username)
+
+        return user_data
+
+    def validate_jwt(self, command, app: App):
+        if "DB" not in list(app.MOD_LIST.keys()):
+            return "Server has no database module"
+
+        token = command[0].token
+        tb_token_jwt = app.MOD_LIST["DB"].tools["get"](["jwt-secret-cloudMService"], app)
+        return validate_jwt(token, tb_token_jwt, app.id)
+
+    def test_if_exists(self, name: str, app: App):
+        if "DB" not in list(app.MOD_LIST.keys()):
+            return "Server has no database module"
+
+        db: MainTool = app.MOD_LIST["DB"]
+
+        get_db = db.tools["get"]
+
+        return get_db([f"*::{name}"], app) != ""
+
+
+# Create a hashed password
+def hash_password(password):
+    """Hash a password for storing."""
+    salt = hashlib.sha256(os.urandom(60)).hexdigest().encode('ascii')
+    pwdhash = hashlib.pbkdf2_hmac('sha512', password.encode('utf-8'),
+                                  salt, 100000)
+    pwdhash = binascii.hexlify(pwdhash)
+    return (salt + pwdhash).decode('ascii')
+
+
+# Check hashed password validity
+def verify_password(stored_password, provided_password):
+    """Verify a stored password against one provided by user"""
+    salt = stored_password[:64]
+    stored_password = stored_password[64:]
+    pwdhash = hashlib.pbkdf2_hmac('sha512',
+                                  provided_password.encode('utf-8'),
+                                  salt.encode('ascii'),
+                                  100000)
+    pwdhash = binascii.hexlify(pwdhash).decode('ascii')
+    return pwdhash == stored_password
+
+
+def gen_token_time(massage: dict, hr_ex):
+    massage['exp'] = datetime.now(tz=timezone.utc) + timedelta(hours=hr_ex)
+    return massage
+
+
+def crate_sing_key(username: str, email: str, password: str, uid: str, message: dict, jwt_secret: str,
+                   app: App or None = None):
+    # Load an RSA key from a JWK dict.
+    password = hash_password(password)
+    message['username'] = username
+    message['password'] = password
+    message['email'] = email
+    message['uid'] = uid
+    message['aud'] = app.id if app else "-1"
+
+    jwt_ket = jwt.encode(message, jwt_secret, headers={"aud": app.id if app else "-1"}, algorithm="HS512")
+    return jwt_ket
+
+
+def validate_jwt(jwt_key: str, jwt_secret: str, aud: str) -> dict or str:
+    print(jwt_key, jwt_secret, aud)
+    try:
+        token = jwt.decode(jwt_key, jwt_secret, audience=aud, leeway=timedelta(seconds=10),
+                           algorithms=["HS512"])
+        return token
+    except jwt.exceptions.InvalidSignatureError:
+        return "InvalidSignatureError"
+    except jwt.exceptions.ExpiredSignatureError:
+        return "ExpiredSignatureError"
+    except jwt.exceptions.InvalidAudienceError:
+        return "InvalidAudienceError"
+    except jwt.exceptions.MissingRequiredClaimError:
+        return "MissingRequiredClaimError"
+    #except Exception as e:
+    #    return str(e)

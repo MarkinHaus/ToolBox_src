@@ -1,6 +1,4 @@
 import os
-from platform import system
-
 from mods.mainTool import MainTool, FileHandler, App
 from Style import Style
 
@@ -41,8 +39,11 @@ class Tools(MainTool, FileHandler):  # FileHandler
     def show_version(self):
         self.print("Version: ", self.version)
 
-    def info(self, command, app: App):
-        app.pretty_print(app.command_viewer(self.api_config))
+    def info(self):
+        for api in list(self.api_config.keys()):
+            self.print(f"Name: {api}")
+            self.print(self.api_config[api])
+        return self.api_config
 
     def new_api(self, command):
         if len(command) <= 4:
@@ -85,7 +86,7 @@ class Tools(MainTool, FileHandler):  # FileHandler
         api_data = self.api_config[api_name]
 
         self.print(app.pretty_print(api_data))
-        g = f"uvicorn api:app --host {api_data['host']} --port {api_data['port']}  --header api:{api_name}.config:{api_name}"
+        g = f"uvicorn api:app --host {api_data['host']} --port {api_data['port']} --header data:{api_name}.config:{api_name}"
         os.system(g)
         print(g)
 
@@ -108,4 +109,6 @@ class Tools(MainTool, FileHandler):  # FileHandler
         self.open_s_file_handler()
         self.save_file_handler()
         self.file_handler_storage.close()
+
+
 

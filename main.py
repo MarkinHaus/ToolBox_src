@@ -128,13 +128,14 @@ def main(app, img):
                 app.exit()
 
         elif command[0].lower() == "help":  # logs(event(helper))
-            app.SUPER_SET += ['mode', 'live', 'debug']
+            app.MACRO += ['mode:live', 'mode:debug', 'monit', 'mode:stuf']
             n = command[1] if len(command) > 2 else ''
             app.help(n)
 
         elif command[0].upper() == 'LOAD-MOD':  # builtin events(event(cloudM(_)->event(Build)))
             if len(command) == 2:
                 app.save_load(command[1])
+                app.new_ac_mod(command[1])
             else:
                 if system() == "Windows":
                     os.system("dir .\mods")
@@ -151,20 +152,26 @@ def main(app, img):
                 os.system("clear")
 
         elif command[0] == 'mode':
-            app.SUPER_SET += ['live', 'debug']
+            app.SUPER_SET += ['mode:live', 'mode:debug', 'monit', 'mode:stuf']
             print(f'{mode}')
 
-        elif command[0] == 'live':
+        elif command[0] == 'mode:live':
             mode = 'live'
             app.debug = False
 
-        elif command[0] == 'auto-save':
+        elif command[0] == 'mode:auto-save':
             app.auto_save = not app.auto_save
             print('auto-save', app.auto_save)
 
-        elif command[0] == 'debug':
+        elif command[0] == 'mode:debug':
             mode = 'debug'
             app.debug = True
+
+        elif command[0] == 'monit':
+            print(f"{mode=} \n{app.debug=}\n{app.id=}\n{app.auto_save=}\n{app.stuf_load=}")
+
+        elif command[0] == 'mode:stuf':
+            app.stuf_load = not app.stuf_load
 
         elif command[0].upper() in app.MOD_LIST.keys():
             app.new_ac_mod(command[0])
@@ -184,7 +191,7 @@ def main(app, img):
 
 
 if __name__ == '__main__':
-    tb_app = App()
+    tb_app = App("main-")
 
     tb_img = tb_app.save_load("welcome").print_t
 

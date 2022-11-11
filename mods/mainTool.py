@@ -15,6 +15,7 @@ class MainTool:
         self.color = kwargs["color"]
         self.todo = kwargs["load"]
         self._on_exit = kwargs["on_exit"]
+        self.stuf = False
         self.load()
 
     def load(self):
@@ -27,11 +28,12 @@ class MainTool:
         self.logs.append([self, "TOOL successfully loaded"])
 
     def print(self, message, *args, end="\n"):
+        if self.stuf:
+            return
         print(Style.style_dic[self.color] + self.name + Style.style_dic["END"] + ":", message, *args, end=end)
 
     def log(self, message):
         self.logs.append([self, message])
-
 
 
 class Code:
@@ -154,7 +156,9 @@ class FileHandler(Code):
 
 
 class App:
-    def __init__(self, config_filename="tb.config"):
+    def __init__(self, prefix: str = ""):
+
+        config_filename = prefix + node() + ".config"
 
         self.config_fh = FileHandler(config_filename)
         self.config_fh.open_l_file_handler()
@@ -166,13 +170,33 @@ class App:
             "HELPER": "helper~~~:",
             "debug": "debug~~~~:",
             "id": "name-spa~:",
+            "st-load": "mute~load:",
         }
 
-        self.MACRO = self.get_config_data("MACRO", [])
-        self.MACRO_color = self.get_config_data("MACRO_C", {})
-        self.HELPER = self.get_config_data("HELPER", {})
+        self.MACRO = self.get_config_data("MACRO", ['HELP', 'LOAD-MOD', 'LOGS', 'EXIT', '_hr', '..', 'cls', 'monit'])
+        self.MACRO_color = self.get_config_data("MACRO_C", {'HELP': 'GREEN', 'LOAD-MOD': 'BLUE', 'EXIT': 'RED',
+                                                            'monit': 'YELLOW', '..': 'MAGENTA', 'LOGS': 'MAGENTA',
+                                                            'cls': 'WHITE'
+                                                            })
+        self.HELPER = self.get_config_data("HELPER", {
+            'HELP': [['Information', 'version : 0.1.0', 'color : GREEN', 'syntax : help [command]',
+                      'help is available in all subsets']],
+            'LOAD-MOD': [['Information', 'version : 0.1.0', 'color : BLUE', 'syntax : LOAD-MOD [filename]',
+                          'file must be in mods folder ']],
+            'EXIT': [['Information', 'version : 0.1.0', 'color : RED', 'syntax : EXIT',
+                      'The only way to exit in TOOL BOX']],
+            '..': [['Information', 'version : 0.1.0', 'color : MAGENTA', 'syntax : ..',
+                    'Brings u Back to Main']],
+            'LOGS': [['Information', 'version : 0.1.0', 'color : MAGENTA', 'syntax : LOGS',
+                      'show logs']],
+            '_hr': [['Information', 'version : ----', 'Hotreload all mods']],
+            'cls': [['Information', 'version : ----', 'Clear Screen']],
+            'monit': [['Information', 'version : ----', 'go in monit mode']],
+            'mode:debug': [['Test Function', 'version : ----', Style.RED('Code can crash')]]
+        })
 
         self.id = self.get_config_data("id", config_filename)
+        self.stuf_load = self.get_config_data("st-load", False)
         self.auto_save = True
         self.PREFIX = Style.CYAN(f"~{node()}@>")
         self.MOD_LIST = {}
@@ -194,17 +218,17 @@ class App:
                 print(f"Error Loading {key}")
         return t
 
-    #def pre_lib_mod(self, filename):
+    # def pre_lib_mod(self, filename):
     #    lib_mod_dir = ""
-#
+    #
     #    mod_file = open(f"mods/{filename}.py", "rb").read()
-#
+    #
     #    if not os.path.exists(f"./runtime/{self.id}/mod_lib"):
     #        os.makedirs(f"./runtime/{self.id}/mod_lib")
     #    open(self.file_handler_file_prefix + self.file_handler_filename, 'a').close()
     #
     #    open()
-#
+    #
     #    return lib_mod_dir
 
     def load_mod(self, filename):
@@ -218,7 +242,6 @@ class App:
         self.MACRO.append(mod_name.upper())
         self.MACRO_color[mod_name.upper()] = color
         self.HELPER[mod_name.upper()] = mod.tools["all"]
-
         # for spec, _ in mod.tools["all"]:
         #     self.spec.append(mod_name.upper() + "-" + spec.upper())
 
@@ -387,10 +410,6 @@ class App:
 
         print(f"Name: {self.id} : {__name__}")
 
-        if __name__ == "mods.mainTool" and self.auto_save:
-            self.AC_MOD._on_exit()
-            self.AC_MOD.load()
-
         return res
 
     def set_spec(self):
@@ -400,6 +419,7 @@ class App:
 
     def new_ac_mod(self, name):
         self.AC_MOD = self.MOD_LIST[name.upper()]
+        self.AC_MOD.stuf = self.stuf_load
         self.PREFIX = Style.CYAN(
             f"~{node()}:{Style.Bold(self.pretty_print([name.upper()]).strip())}{Style.CYAN('@>')}")
         self.set_spec()
@@ -410,6 +430,7 @@ class App:
         self.config_fh.add_to_save_file_handler(self.keys["MACRO"], str(self.MACRO))
         self.config_fh.add_to_save_file_handler(self.keys["MACRO_C"], str(self.MACRO_color))
         self.config_fh.add_to_save_file_handler(self.keys["debug"], str(self.debug))
+        self.config_fh.add_to_save_file_handler(self.keys["st-load"], str(self.stuf_load))
 
     def debug_print(self, message, *args, end="\n"):
         if self.debug:
