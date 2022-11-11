@@ -1,15 +1,24 @@
+from pydantic import BaseModel
 from mods.mainTool import App
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, UploadFile
 from typing import Union
 import sys
 import time
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+
+
+class PostRequest(BaseModel):
+    token: str
+    data: dict
+
 
 app = FastAPI()
 
 origins = [
     "http://127.0.0.1:8080",
     "http://localhost:8080",
+    "https://simpelm.com",
 ]
 
 app.add_middleware(
@@ -19,7 +28,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 @app.middleware("http")
 async def add_process_time_header(request: Request, call_next):
@@ -31,63 +39,65 @@ async def add_process_time_header(request: Request, call_next):
 
 
 @app.get("/")
-def read_item():
+def root():
     result = tb_img()
-    return {"result": result}
+    return {"res": result}
 
 
 @app.get("/exit")
-def read_item():
+def close():
     tb_app.exit()
-    return {"exit": exit(0)}
+    exit(0)
+    return {"res": "0"}
 
 
 @app.get("/mod-list")
-def read_item():
-    return {"mod-list": list(tb_app.MOD_LIST.keys())}
+def mod_list():
+    return {"res": list(tb_app.MOD_LIST.keys())}
 
 
 @app.get("/SUPER_SET")
-def read_item():
-    return {"logs": tb_app.SUPER_SET}
+def super_set():
+    return {"res": tb_app.SUPER_SET}
 
 
 @app.get("/prefix")
-def read_item():
-    return {"logs": tb_app.PREFIX}
+def prefix_working_dir():
+    return {"res": tb_app.PREFIX}
 
 
 @app.get("/logs")
-def read_item():
+def logs_app():
     logs = {}
     for log in tb_app.logs_:
         logs[log[0].name] = []
         logs[log[0].name].append(log[1:])
     print(logs)
-    return {"logs": logs}
+    return {"res": logs}
 
 
-@app.get("/{name}")
-def read_item(name: str):
+@app.get("/test-exist/{name}")
+def test_mod_dow(name: str):
     res = "mod-404"
     if name.upper() in tb_app.MOD_LIST:
         tb_app.new_ac_mod(name.upper())
         res = f"{name}-mod-online"
-    return {"result": res}
+    return {"res": res}
 
 
 @app.get("/mod/index/{name}")
-def read_item(name: str):
+def get_mod_index(name: str):
     try:
         tb_app.new_ac_mod(name)
         result = tb_app.help('')
     except:
         result = "None"
-    return {"name": name, "result": result}
+    return {"res": result}
 
 
-@app.get("/{mod}/run/{name}")
-def read_item(mod: str, name: str, command: Union[str, None] = None):
+@app.get("/get/{mod}/run/{name}")
+def get_mod_run(mod: str, name: str, command: Union[str, None] = None):
+    print("get_mod_run")
     res = {}
     if not command:
         command = ''
@@ -98,22 +108,64 @@ def read_item(mod: str, name: str, command: Union[str, None] = None):
     if tb_app.AC_MOD:
         res = tb_app.run_function(name, command.split('|'))
 
-    return {"mod": mod, "name": name, "command": command, "result": res}
+    return {"res": str(res)}
 
+
+@app.post("/post/{mod}/run/{name}")
+async def post_mod_run(data: PostRequest, mod: str, name: str, command: Union[str, None] = None):
+    res = {}
+    if not command:
+        command = ''
+    if tb_app.AC_MOD.name != mod.upper():
+        if mod.upper() in tb_app.MOD_LIST:
+            tb_app.new_ac_mod(mod)
+
+    if tb_app.AC_MOD:
+        command = [data, command.split('|')]
+        res = tb_app.run_function(name, command)
+
+    if type(res) == list:
+        end = []
+        for r in res:
+            end.append(str(r, "utf-8"))
+        res = end
+    return str(res)
+
+@app.post("/upload-file/")
+async def create_upload_file(file: UploadFile):
+    if tb_app.debug:
+        do = False
+        try:
+            tb_app.load_mod(file.filename.split(".py")[0])
+        except ModuleNotFoundError:
+            do = True
+
+        if do:
+            try:
+                with open("./mods/"+file.filename, 'wb') as f:
+                    while contents := file.file.read(1024 * 1024):
+                        f.write(contents)
+            except Exception:
+                return {"res": "There was an error uploading the file"}
+            finally:
+                file.file.close()
+
+            return {"res": f"Successfully uploaded {file.filename}"}
+    return {"res": "not avalable"}
 
 if __name__ == 'api':
 
     config_file = "api.config"
-    name = ""
+    id_name = ""
 
     for i in sys.argv[2:]:
-        if i.startswith('api'):
+        if i.startswith('data'):
             d = i.split(':')
             config_file = d[1]
-            name = d[2]
+            id_name = d[2]
 
-    tb_app = App(config_file)
+    tb_app = App("api-")
     tb_img = tb_app.save_load("welcome").print_a
     tb_img()
-    tb_app.save_load("api_manager").load_api_mods(tb_app.save_load, name)
+    tb_app.save_load("api_manager").load_api_mods(tb_app.save_load, id_name)
     tb_app.new_ac_mod("welcome")
