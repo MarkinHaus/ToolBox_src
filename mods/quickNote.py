@@ -184,7 +184,7 @@ class Tools(MainTool, FileHandler):  # FileHandler
         if err:
             return uid
 
-        return eval(app.MOD_LIST["DB"].tools["set"](["", f"quickNote::types::{uid}", str(data["types"])]))
+        return eval(app.MOD_LIST["DB"].tools["set"](["", f"quickNote::types::{uid}", str(data["types"])])) #
 
     def get_types_api(self, command, app: App):
 
