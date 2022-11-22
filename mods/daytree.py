@@ -90,7 +90,7 @@ class Tools(MainTool, FileHandler):
         return "Don"
 
     def _load_save_db(self, app: App, db_key, data):
-        bucket = app.MOD_LIST["DB"].tools["get"](["-", f"dayTree::{db_key}"], app)
+        bucket = app.MOD_LIST["DB"].tools["get"]([f"dayTree::{db_key}"], app)
         self.print("", bucket)
         if bucket == "":
             bucket = []
@@ -105,7 +105,7 @@ class Tools(MainTool, FileHandler):
 
     def _dump_bucket(self, app: App, uid):
 
-        bucket = app.MOD_LIST["DB"].tools["get"](["-", f"dayTree::bucket::{uid}"], app)
+        bucket = app.MOD_LIST["DB"].tools["get"]([f"dayTree::bucket::{uid}"], app)
         self.print("bucket ", bucket)
         if bucket == "":
             bucket = []
