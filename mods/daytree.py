@@ -97,6 +97,9 @@ class Tools(MainTool, FileHandler):
         else:
             bucket = eval(bucket)
 
+        print("data ", data)
+        print("bucket ", bucket)
+
         for elm in data:
             bucket.append(elm)
 
@@ -112,6 +115,7 @@ class Tools(MainTool, FileHandler):
         else:
             bucket = eval(bucket)
         wx, tx = [], []
+        print("bucket ", bucket)
         for task in bucket:
             if "time" in task["att"]:
                 wx.append(task)
