@@ -283,7 +283,7 @@ class App:
         w_dir = self.id.replace(".", "_")
         working_dir = "./mods/"
         if self.mlm == "C":
-            if not os.path.exists(f"./runtime/{w_dir}/mod_lib"):
+            if os.path.exists(f"./runtime/{w_dir}/mod_lib"):
                 working_dir = f"./runtime/{w_dir}/mod_lib/"
 
         res = os.listdir(working_dir)
