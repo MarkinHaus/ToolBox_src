@@ -112,13 +112,21 @@ def main(app, img):
                             app.save_load(command[1])
                         except Exception as e:
                             print(Style.RED(f"Error adding module {command[1]}\nERROR:\n{e}"))
-
+                    elif command[1] == "-x":
+                        app.reset()
+                        app.remove_all_modules()
+                        while 1:
+                            os.system(" ".join(sys.argv))
+                            print("Restarting..")
+                            exit(0)
                     else:
                         print(f"Module not found {command[1]} |  is case sensitive")
                 else:
                     app.reset()
                     app.remove_all_modules()
-                    app.save_load("cloudM").load_mods(tb_app.save_load)
+                    tb_app.load_all_mods_in_file()
+                    img = tb_app.MOD_LIST["WELCOME"].tools["printT"]
+                    img()
 
         elif command[0].lower() == 'logs':
             app.logs()
