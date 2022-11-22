@@ -280,13 +280,11 @@ class App:
             return self.copy_load(filename)
 
     def load_all_mods_in_file(self):
-
-        working_dir = ""
-        if self.mlm == "I":
-            working_dir = "./mods/"
+        w_dir = self.id.replace(".", "_")
+        working_dir = "./mods/"
         if self.mlm == "C":
-            working_dir = self.id.replace(".", "_")
-            working_dir = f"./runtime/{working_dir}/mod_lib/"
+            if not os.path.exists(f"./runtime/{w_dir}/mod_lib"):
+                working_dir = f"./runtime/{w_dir}/mod_lib/"
 
         res = os.listdir(working_dir)
         if "mainTool" in res:
