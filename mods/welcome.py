@@ -7,10 +7,10 @@ from Style import Style
 
 
 class Tools(MainTool):
-    def __init__(self, logs=None):
-        self.version = "0.2.0"
+    def __init__(self, app=None):
+        self.version = "0.3.2"
         self.name = "welcome"
-        self.logs = logs
+        self.logs = app.logs_ if app else None
         self.color = "YELLOW"
         self.tools = {
             "all": [["Version", "Shows current Version "], ["tool_tip", "tips"], ["Animation", "TOOL BOX 0 8s"],

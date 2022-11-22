@@ -5,10 +5,10 @@ from Style import Style
 
 class Tools(MainTool, FileHandler):  # FileHandler
 
-    def __init__(self, logs=None):
-        self.version = "0.0.1"
+    def __init__(self, app=None):
+        self.version = "0.0.2"
         self.name = "api_manager"
-        self.logs = logs
+        self.logs = app.logs_ if app else None
         self.color = "WHITE"
         self.keys = {
             "Apis": "api~config"
@@ -32,7 +32,7 @@ class Tools(MainTool, FileHandler):  # FileHandler
             "restart-api": self.restart_api,
 
         }
-        FileHandler.__init__(self, "api-m.data")
+        FileHandler.__init__(self, "api-m.data", app.id if app else __name__)
         MainTool.__init__(self, load=self.on_start, v=self.version, tool=self.tools,
                           name=self.name, logs=self.logs, color=self.color, on_exit=self.on_exit)
 
@@ -67,10 +67,10 @@ class Tools(MainTool, FileHandler):  # FileHandler
 
         if type(default_modules) is list and len(default_modules) > 0:
             for i in default_modules:
-                self.print(f"Loading module : ", end='')
+                self.print(f"Loading module {i} : ", end='')
                 try:
-                    load_mod(i)
                     self.log(f"Open mod {i}")
+                    load_mod(i)
                 except Exception as e:
                     print(Style.RED("Error") + f" loading modules : {e}")
                     self.log(f"Error mod {i}")

@@ -1,11 +1,10 @@
-from pydantic import BaseModel
 from mods.mainTool import App
 from fastapi import FastAPI, Request, UploadFile
 from typing import Union
 import sys
 import time
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
 
 
 class PostRequest(BaseModel):
@@ -29,6 +28,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.middleware("http")
 async def add_process_time_header(request: Request, call_next):
     start_time = time.time()
@@ -46,9 +46,15 @@ def root():
 
 @app.get("/exit")
 def close():
+    tb_app.save_exit()
     tb_app.exit()
     exit(0)
     return {"res": "0"}
+
+
+@app.get("/id")
+def close():
+    return {"res": str(tb_app.id)}
 
 
 @app.get("/mod-list")
@@ -108,7 +114,9 @@ def get_mod_run(mod: str, name: str, command: Union[str, None] = None):
     if tb_app.AC_MOD:
         res = tb_app.run_function(name, command.split('|'))
 
-    return {"res": str(res)}
+    if type(res) == str and (res.startswith('{') or res.startswith('[')):
+        res = eval(res)
+    return {"res": res}
 
 
 @app.post("/post/{mod}/run/{name}")
@@ -124,12 +132,10 @@ async def post_mod_run(data: PostRequest, mod: str, name: str, command: Union[st
         command = [data, command.split('|')]
         res = tb_app.run_function(name, command)
 
-    if type(res) == list:
-        end = []
-        for r in res:
-            end.append(str(r, "utf-8"))
-        res = end
-    return str(res)
+    if type(res) == str and (res.startswith('{') or res.startswith('[')):
+        res = eval(res)
+    return {"res": res}
+
 
 @app.post("/upload-file/")
 async def create_upload_file(file: UploadFile):
@@ -142,7 +148,7 @@ async def create_upload_file(file: UploadFile):
 
         if do:
             try:
-                with open("./mods/"+file.filename, 'wb') as f:
+                with open("./mods/" + file.filename, 'wb') as f:
                     while contents := file.file.read(1024 * 1024):
                         f.write(contents)
             except Exception:
@@ -152,6 +158,7 @@ async def create_upload_file(file: UploadFile):
 
             return {"res": f"Successfully uploaded {file.filename}"}
     return {"res": "not avalable"}
+
 
 if __name__ == 'api':
 

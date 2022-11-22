@@ -15,10 +15,10 @@ import jwt
 
 class Tools(MainTool, FileHandler):
 
-    def __init__(self, logs=None):
-        self.version = "0.1.2"
+    def __init__(self, app=None):
+        self.version = "0.2.3"
         self.name = "cloudM"
-        self.logs = logs
+        self.logs = app.logs_ if app else None
         self.color = "CYAN"
         self.keys = {
             "DM": "def-mods~~",
@@ -64,7 +64,7 @@ class Tools(MainTool, FileHandler):
             "download_api_files": self.download_api_files,
         }
 
-        FileHandler.__init__(self, "modules.config")
+        FileHandler.__init__(self, "modules.config", app.id if app else __name__)
 
         MainTool.__init__(self, load=self.load_open_file, v=self.version, tool=self.tools,
                           name=self.name, logs=self.logs, color=self.color, on_exit=self.on_exit)
@@ -89,7 +89,7 @@ class Tools(MainTool, FileHandler):
         version_command = self.get_file_handler(self.keys["URL"])
         url = f"http://127.0.0.1:5000/get/cloudm/run/Version?command=V:{self.version}"
         if version_command is not None:
-            url = version_command + "/get/cloudm/run/Version?command=V:"+f"{self.version=}"
+            url = version_command + "/get/cloudm/run/Version?command=V:" + f"{self.version=}"
 
         self.print(url)
 
@@ -182,10 +182,10 @@ from Style import Style
   
 class Tools(MainTool):  # FileHandler
 
-    def __init__(self, logs=None):
-        self.version = "0.0.1"
+    def __init__(self, app=None):
+        self.version = "0.0.2"
         self.name = "NAME"
-        self.logs = logs
+        self.logs = app.logs_ if app else None
         self.color = "WHITE"
         # self.keys = {}
         self.tools = {
@@ -193,7 +193,7 @@ class Tools(MainTool):  # FileHandler
             "name": "NAME",
             "Version": self.show_version,
         }
-        # FileHandler.__init__(self, "File name")
+        # FileHandler.__init__(self, "File name", app.id if app else __name__)
         MainTool.__init__(self, load=self.on_start, v=self.version, tool=self.tools,
                         name=self.name, logs=self.logs, color=self.color, on_exit=self.on_exit)
                     
@@ -220,7 +220,7 @@ class Tools(MainTool):  # FileHandler
             mod_file = open(fle)
 
             if len(mod_file.read()) != 0:
-                print(Style.Bold("!"))
+                self.print(Style.Bold("!"))
                 self.print(Style.RED("MODULE exists pleas use a other name"))
             else:
                 mod_file = open(fle, "w")
@@ -229,7 +229,7 @@ class Tools(MainTool):  # FileHandler
                 )
 
                 mod_file.close()
-                print("🆗")
+                self.print("🆗")
 
     def upload(self, input_):
         version_command = self.get_file_handler(self.keys["URL"])
@@ -241,9 +241,9 @@ class Tools(MainTool):  # FileHandler
                 name = input_[1]
                 os.system("cd")
                 try:
-                    file = open("/mod/"+name + ".py", "rb").read()
+                    file = open("/mods/" + name + ".py", "rb").read()
                 except IOError:
-                    self.print((Style.RED(f"File does not exist or is not readable: ./mod/{name}.py")))
+                    self.print((Style.RED(f"File does not exist or is not readable: ./mods/{name}.py")))
                     return
 
                 if file:
@@ -304,30 +304,29 @@ class Tools(MainTool):  # FileHandler
         if ".." in filename:
             return "invalid command"
 
-        return open("./mods/"+filename, "rb").read()
-
+        return open("./mods/" + filename, "rb").read()
 
     def add_url_con(self):
         """
         Adds a url to the list of urls
         """
 
-        url = input("Pleas enter URL of CloudM Backend default [http://45.79.251.173:8081] : ")
+        url = input("Pleas enter URL of CloudM Backend default [https://simpelm] : ")
         if url == "":
-            url = "http://45.79.251.173:8081"
+            url = "https://simeplm"
         self.print(Style.YELLOW(f"Adding url : {url}"))
         self.add_to_save_file_handler(self.keys["URL"], url)
 
     def create_account(self):
         version_command = self.get_file_handler(self.keys["URL"])
-        url = "http://127.0.0.1:8081/cloudM/create_acc_mhs"
+        url = "https://simeplm/cloudM/create_acc_mhs"
         if version_command is not None:
             url = version_command + "/cloudM/create_acc_mhs"
         os.system(f"start {url}")
 
     def log_in(self, input_):
         version_command = self.get_file_handler(self.keys["URL"])
-        url = "http://127.0.0.1:8081/cloudM/login"
+        url = "https://simeplm/cloudM/login"
         if version_command is not None:
             url = version_command + "/cloudM/login"
 
@@ -374,8 +373,6 @@ class Tools(MainTool):  # FileHandler
 
         data = command[0].data
 
-        print(data)
-
         username = data["username"]
         email = data["email"]
         password = data["password"]
@@ -392,7 +389,8 @@ class Tools(MainTool):  # FileHandler
 
         if self.test_if_exists(email, app):
             return "email already exists"
-        jwt_key = crate_sing_key(username, email, password, uid, gen_token_time({}, 4380), tb_token_jwt, app)
+        jwt_key = crate_sing_key(username, email, password, uid, gen_token_time({"v": self.version}, 4380),
+                                 tb_token_jwt, app)
         app.MOD_LIST["DB"].tools["set"](["", f"user::{username}::{email}::{uid}", jwt_key])
         return jwt_key
 
@@ -411,7 +409,9 @@ class Tools(MainTool):  # FileHandler
         if not tb_token_jwt:
             return "jwt - not found pleas register one"
 
-        user_data: dict = validate_jwt(token, str(tb_token_jwt, "utf-8"), app.id)
+        user_data_token = app.MOD_LIST["DB"].tools["get"]([f"user::{username}::*"], app)
+
+        user_data: dict = validate_jwt(user_data_token, str(tb_token_jwt, "utf-8"), app.id)
 
         if type(user_data) is str:
             return user_data
@@ -433,7 +433,9 @@ class Tools(MainTool):  # FileHandler
 
         self.print("user login successful : ", t_username)
 
-        return user_data
+        return crate_sing_key(username, user_data["email"], "", user_data["uid"],
+                              gen_token_time({"v": self.version}, 4380),
+                              tb_token_jwt, app)
 
     def validate_jwt(self, command, app: App):
         if "DB" not in list(app.MOD_LIST.keys()):
@@ -496,11 +498,19 @@ def crate_sing_key(username: str, email: str, password: str, uid: str, message: 
     return jwt_ket
 
 
-def validate_jwt(jwt_key: str, jwt_secret: str, aud: str) -> dict or str:
-    print(jwt_key, jwt_secret, aud)
+def get_jwtdata(jwt_key: str, jwt_secret: str):
     try:
-        token = jwt.decode(jwt_key, jwt_secret, audience=aud, leeway=timedelta(seconds=10),
-                           algorithms=["HS512"])
+        token = jwt.decode(jwt_key, jwt_secret, leeway=timedelta(seconds=10),
+                           algorithms=["HS512"], verify=False)
+        return token
+    except jwt.exceptions.InvalidSignatureError:
+        return "InvalidSignatureError"
+
+
+def validate_jwt(jwt_key: str, jwt_secret: str, aud) -> dict or str:
+    try:
+        token = jwt.decode(jwt_key, jwt_secret, leeway=timedelta(seconds=10),
+                           algorithms=["HS512"], audience=aud, do_time_check=True, verify=True)
         return token
     except jwt.exceptions.InvalidSignatureError:
         return "InvalidSignatureError"
@@ -510,5 +520,5 @@ def validate_jwt(jwt_key: str, jwt_secret: str, aud: str) -> dict or str:
         return "InvalidAudienceError"
     except jwt.exceptions.MissingRequiredClaimError:
         return "MissingRequiredClaimError"
-    #except Exception as e:
-    #    return str(e)
+    except Exception as e:
+        return str(e)

@@ -90,6 +90,7 @@ def main(app, img):
         r += 1
         if r % 10 == 0:
             img()
+        print("", end="" + "->>1\r")
         command = user_input(app)
 
         if command[0] == '':  # log(helper)
@@ -122,13 +123,16 @@ def main(app, img):
         elif command[0].lower() == 'logs':
             app.logs()
 
+        elif command[0].lower() == 'app-info':
+            print(f"{app.id = }\n{app.stuf_load = }\n{app.mlm = }\n{app.auto_save = }"
+                  f"\n{app.AC_MOD = }\n{app.debug = }")
+
         elif command[0].upper() == "EXIT":  # builtin events(exit)
             if input("Do you want to exit? (y/n): ") in ["y", "yes", "Y"]:
-                # app.save_exit()
+                app.save_exit()
                 app.exit()
 
         elif command[0].lower() == "help":  # logs(event(helper))
-            app.MACRO += ['mode:live', 'mode:debug', 'monit', 'mode:stuf']
             n = command[1] if len(command) > 2 else ''
             app.help(n)
 
@@ -152,23 +156,18 @@ def main(app, img):
                 os.system("clear")
 
         elif command[0] == 'mode':
-            app.SUPER_SET += ['mode:live', 'mode:debug', 'monit', 'mode:stuf']
-            print(f'{mode}')
+            help_ = ['mode:live', 'mode:debug', 'mode', 'mode:stuf', 'app-info']
+            app.SUPER_SET += help_
+            app.MACRO += help_
+            print(f"{mode=} \n{app.debug=}\n{app.id=}\n{app.stuf_load=}")
 
         elif command[0] == 'mode:live':
             mode = 'live'
             app.debug = False
 
-        elif command[0] == 'mode:auto-save':
-            app.auto_save = not app.auto_save
-            print('auto-save', app.auto_save)
-
         elif command[0] == 'mode:debug':
             mode = 'debug'
             app.debug = True
-
-        elif command[0] == 'monit':
-            print(f"{mode=} \n{app.debug=}\n{app.id=}\n{app.auto_save=}\n{app.stuf_load=}")
 
         elif command[0] == 'mode:stuf':
             app.stuf_load = not app.stuf_load
@@ -203,8 +202,6 @@ if __name__ == '__main__':
 
     print("\n\n\n\tEXIT")
     input("Press Enter to EXIT")
-
-
 
 #    MACRO = ['HELP', 'LOAD-MOD', 'LOGS', 'EXIT', '_hr', '..', 'TEST']
 #    MACRO_color = {'HELP': 'GREEN',
@@ -245,4 +242,3 @@ if __name__ == '__main__':
 #       debug~~~~:True
 #
 #
-

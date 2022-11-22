@@ -8,10 +8,10 @@ from mods.mainTool import MainTool, FileHandler, App
 
 class Tools(MainTool, FileHandler):
 
-    def __init__(self, logs=None):
-        self.version = "0.0.1"
+    def __init__(self, app=None):
+        self.version = "0.0.2"
         self.name = "auto_server"
-        self.logs = logs
+        self.logs = app.logs_ if app else None
         self.color = "WHITE"
         self.keys = {
             "default": "default~~~",
@@ -39,7 +39,7 @@ class Tools(MainTool, FileHandler):
             "test": self.test,
             "hotfix": self.hotfix,
         }
-        FileHandler.__init__(self, "auto-server.data")
+        FileHandler.__init__(self, "auto-server.data", app.id if app else __name__)
         MainTool.__init__(self, load=self.on_start, v=self.version, tool=self.tools,
                           name=self.name, logs=self.logs, color=self.color, on_exit=self.on_exit)
 
@@ -90,7 +90,7 @@ class Tools(MainTool, FileHandler):
 
                 src = self.defaults["PY-api:src"]
                 name = self.defaults["PY-api:name"]
-                start_py_api(src, name)
+                start_py_api(src, name, app)
                 os.system("disown")
 
             if "-d" in command:
@@ -261,4 +261,4 @@ def upload_mhs(src, pwd, user, ip, des_path):
 def upload_simpel(src, pwd, user, ip, des_path):
     os.chdir(src)
     os.system("tar cfvz app.tar.gz ./app")
-    os.system(f'sshpass -p "{pwd}" scp -r {user}@{ip}:{des_path} ./app.tar.gz')
+    os.system(f'sshpass -p "{pwd}" scp -r {user}@{ip}:{des_path} ../app.tar.gz')
