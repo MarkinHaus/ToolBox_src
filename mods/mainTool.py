@@ -292,7 +292,7 @@ class App:
         if "mainTool" in res:
             res.remove("mainTool")
         for mod in res:
-            if mod.endswith(".py") and not mod.startswith("__"):
+            if mod.endswith(".py") and not mod.startswith("__"):#
                 print(f"Loading module : {mod[:-3]}", end=' ')
                 try:
                     self.load_mod(mod[:-3])

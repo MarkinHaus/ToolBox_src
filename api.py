@@ -172,7 +172,7 @@ if __name__ == 'api':
             id_name = d[2]
 
     tb_app = App("api-")
-    tb_img = tb_app.save_load("welcome").print_a
+    tb_app.load_all_mods_in_file()
+    tb_img = tb_app.MOD_LIST["WELCOME"].tools["printT"]
     tb_img()
-    tb_app.save_load("api_manager").load_api_mods(tb_app.save_load, id_name)
     tb_app.new_ac_mod("welcome")

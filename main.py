@@ -204,7 +204,7 @@ if __name__ == '__main__':
     print("\n\n\n\tEXIT")
     input("Press Enter to EXIT")
 
-#    MACRO = ['HELP', 'LOAD-MOD', 'LOGS', 'EXIT', '_hr', '..', 'TEST']
+#    MACRO = ['HELP', 'LOAD-MOD', 'LOGS', 'EXIT', '_hr', '..', 'TEST']2
 #    MACRO_color = {'HELP': 'GREEN',
 #                   'LOAD-MOD': 'BLUE',
 #                   'EXIT': 'RED',
