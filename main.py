@@ -208,9 +208,8 @@ if __name__ == '__main__':
     tb_img = tb_app.MOD_LIST["WELCOME"].tools["printT"]
     tb_img()
     main(tb_app, tb_img)
-
     print("\n\n\n\tEXIT")
-    input("Press Enter to EXIT")
+
 
 #    MACRO = ['HELP', 'LOAD-MOD', 'LOGS', 'EXIT', '_hr', '..', 'TEST']2
 #    MACRO_color = {'HELP': 'GREEN',
