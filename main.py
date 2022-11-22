@@ -9,7 +9,7 @@ import readchar
 from mods.mainTool import App
 
 
-session_history = []
+session_history = [[]]
 
 
 def user_input(app):
@@ -39,16 +39,16 @@ def user_input(app):
                 helper_index += 1
 
         elif key == readchar.key.UP:
-            sh_index += 1
-            if sh_index > len(session_history):
-                sh_index = 0
+            sh_index -= 1
+            if sh_index <= 0:
+                sh_index = len(session_history)-1
             command = ""
             print_command = session_history[sh_index]
 
         elif key == readchar.key.DOWN:
-            sh_index -= 1
-            if sh_index <= 0:
-                sh_index = len(session_history)-1
+            sh_index += 1
+            if sh_index >= len(session_history):
+                sh_index = 0
             command = ""
             print_command = session_history[sh_index]
 
