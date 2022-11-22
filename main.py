@@ -97,10 +97,10 @@ def main(app, img):
             print("Pleas enter a command or help for mor information")
 
         elif command[0].lower() == '_hr':
-            if input(f"Do you to hot-reloade {'alle mods' if len(command) <= 1 else command[1]}? (y/n): ") in ["y",
-                                                                                                               "yes",
-                                                                                                               "Y"]:
-                if len(command) == 2:
+            if len(command) == 2:
+                if input(f"Do you to hot-reloade {'alle mods' if len(command) <= 1 else command[1]}? (y/n): ") in \
+                        ["y", "yes", "Y"]:
+
                     if command[1] in app.MOD_LIST.keys():
                         app.reset()
                         try:
@@ -121,12 +121,12 @@ def main(app, img):
                             exit(0)
                     else:
                         print(f"Module not found {command[1]} |  is case sensitive")
-                else:
-                    app.reset()
-                    app.remove_all_modules()
-                    tb_app.load_all_mods_in_file()
-                    img = tb_app.MOD_LIST["WELCOME"].tools["printT"]
-                    img()
+            else:
+                app.reset()
+                app.remove_all_modules()
+                tb_app.load_all_mods_in_file()
+                img = tb_app.MOD_LIST["WELCOME"].tools["printT"]
+                img()
 
         elif command[0].lower() == 'logs':
             app.logs()
@@ -209,7 +209,6 @@ if __name__ == '__main__':
     tb_img()
     main(tb_app, tb_img)
     print("\n\n\n\tEXIT")
-
 
 #    MACRO = ['HELP', 'LOAD-MOD', 'LOGS', 'EXIT', '_hr', '..', 'TEST']2
 #    MACRO_color = {'HELP': 'GREEN',
