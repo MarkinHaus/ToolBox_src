@@ -129,8 +129,9 @@ class Tools(MainTool, FileHandler):
         wx = self._load_save_db(app, f"dayTree::wx::{uid}", wx)
 
         # do day += wx intelligent
-        days[0] += tx
-        day = self._load_save_db(app, f"dayTree::2day::{uid}", days[0])
+        self.print(tx)
+
+        day = self._load_save_db(app, f"dayTree::2day::{uid}", tx)
 
         return day
 
