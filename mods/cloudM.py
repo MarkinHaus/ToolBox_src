@@ -36,7 +36,7 @@ class Tools(MainTool, FileHandler):
                     ["download", "download a mod from MarkinHaus server", "add is case sensitive"],
                     ["#update", "update a mod from MarkinHaus server ", Style.RED("NOT IMPLEMENTED"),
                      "add is case sensitive"],
-                    ["#update-core", "update ToolBox from MarkinHaus server ", Style.RED("NOT IMPLEMENTED"),
+                    ["#update-core", "update ToolBox from (git) MarkinHaus server ",
                      "add is case sensitive"],
                     ["upload", "upload a mod to MarkinHaus server", "add is case sensitive"],
                     ["first-web-connection", "set up a web connection to MarkinHaus"],
@@ -62,6 +62,7 @@ class Tools(MainTool, FileHandler):
             "log_in_user": self.log_in_user,
             "validate_jwt": self.validate_jwt,
             "download_api_files": self.download_api_files,
+            "#update-core": self.update_core,
         }
 
         FileHandler.__init__(self, "modules.config", app.id if app else __name__)
@@ -364,8 +365,8 @@ class Tools(MainTool):  # FileHandler
             self.print(Style.RED(f"ERROR: {input_} len {len(input_)} != 3"))
 
     def update_core(self):
-        self.print("Exit and")
-        self.print("git pull https://github.com/MarkinHaus/ToolBoxV2")
+        self.print(Style.Bold(Style.BLUE(Style.Underline("RUN _hr -x after update"))))
+        os.system("git pull")
 
     def create_user(self, command, app: App):
         if "DB" not in list(app.MOD_LIST.keys()):
