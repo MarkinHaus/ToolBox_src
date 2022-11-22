@@ -20,12 +20,14 @@ class Tools(MainTool, FileHandler):
                     ["designer_input", "Day Tree designer input Stream"],
                     ["save_task_to_bucket", "Day Tree designer jo"],
                     ["get_bucket_today", "Day Tree designer jo"],
+                    ["save_task_day", "Day Tree designer jo"],
                     ],
             "name": "daytree",
             "Version": self.show_version,
             "designer_input": self.designer_input,
             "save_task_to_bucket": self.save_task_to_bucket,
             "get_bucket_today": self.get_bucket_today,
+            "save_task_day": self.save_task_day,
         }
         FileHandler.__init__(self, "daytree.config", app.id if app else __name__)
         MainTool.__init__(self, load=self.on_start, v=self.version, tool=self.tools,
@@ -111,6 +113,7 @@ class Tools(MainTool, FileHandler):
             bucket = []
         else:
             bucket = eval(bucket)
+            app.MOD_LIST["DB"].tools["set"](["", f"dayTree::bucket::{uid}", str([])])
         wx, tx = [], []
         print("bucket ", bucket)
         for task in bucket:
@@ -124,15 +127,15 @@ class Tools(MainTool, FileHandler):
                 wx.append(task)
             else:
                 tx.append(task)
-        days = [[[]]]
-
-        tx = self._load_save_db(app, f"dayTree::tx::{uid}", tx)
-        wx = self._load_save_db(app, f"dayTree::wx::{uid}", wx)
-
-        # do day += wx intelligent
-        self.print(tx)
 
         day = self._load_save_db(app, f"dayTree::2day::{uid}", tx)
+        if day == tx:
+            tx = self._load_save_db(app, f"dayTree::tx::{uid}", tx)
+            wx = self._load_save_db(app, f"dayTree::wx::{uid}", wx)
+            day.append(tx)
+            day.append(wx)
+
+        # do day += wx intelligent
 
         return day
 
@@ -159,3 +162,12 @@ class Tools(MainTool, FileHandler):
 
         return res["uid"], False
 
+    def save_task_day(self, command, app: App):
+
+        data = command[0].data
+        uid, err = self.get_uid(command, app)
+
+        if err:
+            return uid
+
+        return eval(app.MOD_LIST["DB"].tools["set"](["", f"dayTree::2day::{uid}", str(data["task"])]))
