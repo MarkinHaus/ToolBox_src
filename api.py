@@ -132,9 +132,11 @@ async def post_mod_run(data: PostRequest, mod: str, name: str, command: Union[st
         command = [data, command.split('|')]
         res = tb_app.run_function(name, command)
 
+    print(res)
     if type(res) == str and (res.startswith('{') or res.startswith('[')) or res.startswith('"[') or res.startswith('"{')\
             or res.startswith('\"[') or res.startswith('\"{'):
         res = eval(res)
+    print(res)
     return {"res": res}
 
 
