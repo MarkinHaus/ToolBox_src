@@ -371,7 +371,11 @@ class Tools(MainTool):  # FileHandler
         app.reset()
         app.remove_all_modules()
         while 1:
-            com = " ".join(sys.orig_argv)
+            try:
+                com = " ".join(sys.orig_argv)
+            except AttributeError:
+                com = "python3 "
+                com += " ".join(sys.argv)
             os.system(com)
             print("Restarting..")
             exit(0)

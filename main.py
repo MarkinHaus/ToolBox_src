@@ -9,6 +9,9 @@ import readchar
 from mods.mainTool import App
 
 
+session_history = []
+
+
 def user_input(app):
     get_input = True
     command = ""
@@ -16,6 +19,7 @@ def user_input(app):
     helper = ""
     helper_index = 0
     options = []
+    sh_index = 0
 
     while get_input:
 
@@ -35,10 +39,18 @@ def user_input(app):
                 helper_index += 1
 
         elif key == readchar.key.UP:
-            pass
+            sh_index += 1
+            if sh_index > len(session_history):
+                sh_index = 0
+            command = ""
+            print_command = session_history[sh_index]
 
         elif key == readchar.key.DOWN:
-            pass
+            sh_index -= 1
+            if sh_index <= 0:
+                sh_index = len(session_history)-1
+            command = ""
+            print_command = session_history[sh_index]
 
         elif key == b'\x08' or key == '\x7f':
             if len(command) == 0 and len(print_command) != 0:
@@ -79,7 +91,7 @@ def user_input(app):
 
     sys.stdout.write("\033[K")
     print(app.PREFIX + app.pretty_print(print_command) + "\n")
-
+    session_history.append(print_command)
     return print_command
 
 
@@ -90,7 +102,7 @@ def main(app, img):
         r += 1
         if r % 10 == 0:
             img()
-        print("", end="" + "->>1\r")
+        print("", end="" + "->>\r")
         command = user_input(app)
 
         if command[0] == '':  # log(helper)
@@ -116,7 +128,11 @@ def main(app, img):
                         app.reset()
                         app.remove_all_modules()
                         while 1:
-                            com = " ".join(sys.orig_argv)
+                            try:
+                                com = " ".join(sys.orig_argv)
+                            except AttributeError:
+                                com = "python3 "
+                                com += " ".join(sys.argv)
                             os.system(com)
                             print("Restarting..")
                             exit(0)
@@ -202,14 +218,24 @@ def main(app, img):
 
 
 if __name__ == '__main__':
-    tb_app = App("main-")
+    app_name = "main-"
+    try:
+        com = " ".join(sys.orig_argv)
+    except AttributeError:
+        com = "python3 "
+        com += " ".join(sys.argv)
+    print(com)
+    if len(sys.argv) >= 2:
+        app_name = sys.argv[1]
+
+    tb_app = App(app_name)
 
     tb_app.load_all_mods_in_file()
 
     tb_img = tb_app.MOD_LIST["WELCOME"].tools["printT"]
     tb_img()
     main(tb_app, tb_img)
-    print("\n\n\n\tEXIT")
+    print("\n\n\n\tSee u")
 
 #    MACRO = ['HELP', 'LOAD-MOD', 'LOGS', 'EXIT', '_hr', '..', 'TEST']2
 #    MACRO_color = {'HELP': 'GREEN',

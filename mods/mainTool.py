@@ -287,17 +287,18 @@ class App:
                 working_dir = f"./runtime/{w_dir}/mod_lib/"
 
         res = os.listdir(working_dir)
-        if "mainTool" in res:
-            res.remove("mainTool")
+
         for mod in res:
-            if mod.endswith(".py") and not mod.startswith("__"):#
-                print(f"Loading module : {mod[:-3]}", end=' ')
-                try:
-                    self.load_mod(mod[:-3])
-                except Exception as e:
-                    print(Style.RED("Error") + f" loading modules : {e}")
-            else:
-                print(f"{mod} is not a valid module")
+            if "mainTool" not in mod:
+                if mod.endswith(".py") and not mod.startswith("__"):
+                    print(f"Loading module : {mod[:-3]}", end=' ')
+                    if self.debug:
+                        self.load_mod(mod[:-3])
+                    else:
+                        try:
+                            self.load_mod(mod[:-3])
+                        except Exception as e:
+                            print(Style.RED("Error") + f" loading modules : {e}")
 
     def copy_load(self, mod_name):
         loc = self.pre_lib_mod(mod_name)
