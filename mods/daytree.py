@@ -85,7 +85,7 @@ class Tools(MainTool, FileHandler):
         if err:
             return uid
 
-        self._load_save_db(app, f"bucket::{uid}", [[command[0].data["task"]]])
+        self._load_save_db(app, f"bucket::{uid}", [command[0].data["task"]])
 
         return "Don"
 
