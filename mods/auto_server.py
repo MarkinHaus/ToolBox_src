@@ -239,7 +239,7 @@ def cargo_test(src):
 def build_simpel(src):
     os.chdir(src)
     os.system("cd")
-    os.system("cargo build -relaes -target=wasem32-unknown-unknown")
+    os.system("cargo build --target=wasm32-unknown-unknown --release")
     os.system("mv ./traget/wasem32-unknown-unknown/relaese/simpel.wasm  ./app/simpel.wasm")
 
 
@@ -260,5 +260,4 @@ def upload_mhs(src, pwd, user, ip, des_path):
 @cd_raper
 def upload_simpel(src, pwd, user, ip, des_path):
     os.chdir(src)
-    os.system("tar cfvz app.tar.gz ./app")
-    os.system(f'sshpass -p "{pwd}" scp -r {user}@{ip}:{des_path} ../app.tar.gz')
+    os.system(f'sshpass -p "{pwd}" scp -r {user}@{ip}:{des_path} ./app')

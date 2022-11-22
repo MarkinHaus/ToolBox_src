@@ -203,7 +203,7 @@ class App:
 
         self.id = self.get_config_data("id", [name])[0]
         self.stuf_load = self.get_config_data("st-load", False)
-        self.mlm = self.get_config_data("module-load-mode", ["Inplace"])[0]
+        self.mlm = self.get_config_data("module-load-mode", ["I"])[0]
         self.auto_save = True
         self.PREFIX = Style.CYAN(f"~{node()}@>")
         self.MOD_LIST = {}
@@ -274,10 +274,32 @@ class App:
 
     def load_mod(self, filename):
 
-        if self.mlm == "Inplace":
+        if self.mlm == "I":
             return self.inplace_load(filename)
-        if self.mlm == "Coppy":
+        if self.mlm == "C":
             return self.copy_load(filename)
+
+    def load_all_mods_in_file(self):
+
+        working_dir = ""
+        if self.mlm == "I":
+            working_dir = "./mods/"
+        if self.mlm == "C":
+            working_dir = self.id.replace(".", "_")
+            working_dir = f"./runtime/{working_dir}/mod_lib/"
+
+        res = os.listdir(working_dir)
+        if "mainTool" in res:
+            res.remove("mainTool")
+        for mod in res:
+            if mod.endswith(".py") and not mod.startswith("__"):
+                print(f"Loading module : {mod[:-3]}", end=' ')
+                try:
+                    self.load_mod(mod[:-3])
+                except Exception as e:
+                    print(Style.RED("Error") + f" loading modules : {e}")
+            else:
+                print(f"{mod} is not a valid module")
 
     def copy_load(self, mod_name):
         loc = self.pre_lib_mod(mod_name)

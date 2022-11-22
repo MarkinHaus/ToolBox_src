@@ -141,6 +141,9 @@ def main(app, img):
                 app.save_load(command[1])
                 app.new_ac_mod(command[1])
             else:
+                res = os.listdir("./mods/")
+                app.SUPER_SET += res
+                app.MACRO += res
                 if system() == "Windows":
                     os.system("dir .\mods")
                 if system() == "Linux":
@@ -192,12 +195,10 @@ def main(app, img):
 if __name__ == '__main__':
     tb_app = App("main-")
 
-    tb_img = tb_app.save_load("welcome").print_t
+    tb_app.load_all_mods_in_file()
 
+    tb_img = tb_app.MOD_LIST["WELCOME"].tools["printT"]
     tb_img()
-
-    tb_app.save_load("cloudM").load_mods(tb_app.save_load)
-
     main(tb_app, tb_img)
 
     print("\n\n\n\tEXIT")
