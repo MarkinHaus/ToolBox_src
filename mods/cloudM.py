@@ -1,3 +1,4 @@
+import sys
 import threading
 
 from mods.mainTool import MainTool, FileHandler, App
@@ -364,9 +365,16 @@ class Tools(MainTool):  # FileHandler
         else:
             self.print(Style.RED(f"ERROR: {input_} len {len(input_)} != 3"))
 
-    def update_core(self):
-        self.print(Style.Bold(Style.BLUE(Style.Underline("RUN _hr -x after update"))))
+    def update_core(self, command, app: App):
+        self.print("Init Restarting..")
         os.system("git pull")
+        app.reset()
+        app.remove_all_modules()
+        while 1:
+            com = " ".join(sys.orig_argv)
+            os.system(com)
+            print("Restarting..")
+            exit(0)
 
     def create_user(self, command, app: App):
         if "DB" not in list(app.MOD_LIST.keys()):

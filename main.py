@@ -116,8 +116,7 @@ def main(app, img):
                         app.reset()
                         app.remove_all_modules()
                         while 1:
-                            com = " ".join(sys.argv)
-                            print(com)
+                            com = " ".join(sys.orig_argv)
                             os.system(com)
                             print("Restarting..")
                             exit(0)
@@ -203,7 +202,6 @@ def main(app, img):
 
 
 if __name__ == '__main__':
-    print(sys.argv, " ## ", sys.orig_argv)
     tb_app = App("main-")
 
     tb_app.load_all_mods_in_file()
