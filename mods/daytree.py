@@ -19,11 +19,13 @@ class Tools(MainTool, FileHandler):
             "all": [["Version", "Shows current Version"],
                     ["designer_input", "Day Tree designer input Stream"],
                     ["save_task_to_bucket", "Day Tree designer jo"],
+                    ["get_bucket_today", "Day Tree designer jo"],
                     ],
             "name": "daytree",
             "Version": self.show_version,
             "designer_input": self.designer_input,
             "save_task_to_bucket": self.save_task_to_bucket,
+            "get_bucket_today": self.get_bucket_today,
         }
         FileHandler.__init__(self, "daytree.config", app.id if app else __name__)
         MainTool.__init__(self, load=self.on_start, v=self.version, tool=self.tools,
@@ -83,18 +85,58 @@ class Tools(MainTool, FileHandler):
         if err:
             return uid
 
-        bucket = app.MOD_LIST["DB"].tools["get"](["-", f"dayTree::bucket::{uid}"], app)
-        print(bucket)
+        self._load_save_db(app, f"dayTree::bucket::{uid}", [command[0].data["task"]])
+
+        return "Don"
+
+    def _load_save_db(self, app: App, db_key, data):
+        bucket = app.MOD_LIST["DB"].tools["get"](["-", f"dayTree::{db_key}"], app)
+        self.print("")
         if bucket == "":
             bucket = []
         else:
             bucket = eval(bucket)
 
-        bucket.append(command[0].data["task"])
+        for elm in data:
+            bucket.append(elm)
 
-        app.MOD_LIST["DB"].tools["set"](["", f"dayTree::bucket::{uid}", str(bucket)])
+        app.MOD_LIST["DB"].tools["set"](["", f"dayTree::{db_key}", str(bucket)])
+        return bucket
 
-        return "Don"
+    def _dump_bucket(self, app: App, uid):
+
+        bucket = eval(app.MOD_LIST["DB"].tools["get"](["-", f"dayTree::bucket::{uid}"]))
+        wx, tx = [], []
+        for task in bucket:
+            if "time" in task["att"]:
+                wx.append(task)
+            elif "uhr" in task["att"]:
+                wx.append(task)
+            elif "Time" in task["att"]:
+                wx.append(task)
+            elif "Uhr" in task["att"]:
+                wx.append(task)
+            else:
+                tx.append(task)
+        days = [[[]]]
+
+        tx = self._load_save_db(app, f"dayTree::tx::{uid}", tx)
+        wx = self._load_save_db(app, f"dayTree::wx::{uid}", wx)
+
+        # do day += wx intelligent
+        days[0] += tx
+        day = self._load_save_db(app, f"dayTree::2day::{uid}", days[0])
+
+        return day
+
+    def get_bucket_today(self, command, app: App):
+        uid, err = self.get_uid(command, app)
+        if err:
+            return uid
+
+        day = self._dump_bucket(app, uid)
+
+        return day
 
     def get_uid(self, command, app: App):
         if "CLOUDM" not in list(app.MOD_LIST.keys()):
