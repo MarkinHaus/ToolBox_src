@@ -105,7 +105,7 @@ class Tools(MainTool, FileHandler):
 
     def _dump_bucket(self, app: App, uid):
 
-        bucket = eval(app.MOD_LIST["DB"].tools["get"](["-", f"dayTree::bucket::{uid}"]))
+        bucket = eval(app.MOD_LIST["DB"].tools["get"](["-", f"dayTree::bucket::{uid}"], app))
         wx, tx = [], []
         for task in bucket:
             if "time" in task["att"]:
@@ -152,21 +152,3 @@ class Tools(MainTool, FileHandler):
 
         return res["uid"], False
 
-    def save_inbox_api(self, command, app: App):
-
-        data = command[0].data
-        uid, err = self.get_uid(command, app)
-
-        if err:
-            return uid
-
-        return app.MOD_LIST["DB"].tools["set"](["", f"dayTree::task::{uid}", data])
-
-    def get_inbox_api(self, command, app: App):
-
-        uid, err = self.get_uid(command, app)
-
-        if err:
-            return uid
-
-        return app.MOD_LIST["DB"].tools["get"](["-", f"dayTree::task::{uid}"])
