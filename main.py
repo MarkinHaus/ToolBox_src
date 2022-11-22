@@ -203,6 +203,7 @@ def main(app, img):
 
 
 if __name__ == '__main__':
+    print(sys.argv, " ## ", sys.orig_argv)
     tb_app = App("main-")
 
     tb_app.load_all_mods_in_file()
