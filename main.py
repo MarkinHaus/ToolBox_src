@@ -116,7 +116,9 @@ def main(app, img):
                         app.reset()
                         app.remove_all_modules()
                         while 1:
-                            os.system(" ".join(sys.argv))
+                            com = " ".join(sys.argv)
+                            print(com)
+                            os.system(com)
                             print("Restarting..")
                             exit(0)
                     else:
