@@ -116,8 +116,10 @@ def get_mod_run(mod: str, name: str, command: Union[str, None] = None):
     if tb_app.AC_MOD:
         res = tb_app.run_function(name, command.split('|'))
 
-    if type(res) == str and (res.startswith('{') or res.startswith('[')):
-        res = eval(res)
+    if type(res) == str:
+        if (res.startswith('{') or res.startswith('[')) or res.startswith('"[') or res.startswith('"{') \
+                or res.startswith('\"[') or res.startswith('\"{') or res.startswith('b"[') or res.startswith('b"{'):
+            res = eval(res)
     return {"res": res}
 
 
@@ -134,11 +136,11 @@ async def post_mod_run(data: PostRequest, mod: str, name: str, command: Union[st
         command = [data, command.split('|')]
         res = tb_app.run_function(name, command)
 
-    print(res)
-    if type(res) == str and (res.startswith('{') or res.startswith('[')) or res.startswith('"[') or res.startswith('"{')\
-            or res.startswith('\"[') or res.startswith('\"{'):
-        res = eval(res)
-    print(res)
+    if type(res) == str:
+        if (res.startswith('{') or res.startswith('[')) or res.startswith('"[') or res.startswith('"{') \
+                or res.startswith('\"[') or res.startswith('\"{') or res.startswith('b"[') or res.startswith('b"{'):
+            res = eval(res)
+
     return {"res": res}
 
 
