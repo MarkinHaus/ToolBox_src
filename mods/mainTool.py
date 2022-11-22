@@ -1,5 +1,5 @@
 import os
-from platform import node
+from platform import node, system
 from importlib import import_module
 from inspect import signature
 
