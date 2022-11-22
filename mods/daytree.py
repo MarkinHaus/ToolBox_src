@@ -105,7 +105,12 @@ class Tools(MainTool, FileHandler):
 
     def _dump_bucket(self, app: App, uid):
 
-        bucket = eval(app.MOD_LIST["DB"].tools["get"](["-", f"dayTree::bucket::{uid}"], app))
+        bucket = app.MOD_LIST["DB"].tools["get"](["-", f"dayTree::bucket::{uid}"], app)
+        self.print("")
+        if bucket == "":
+            bucket = []
+        else:
+            bucket = eval(bucket)
         wx, tx = [], []
         for task in bucket:
             if "time" in task["att"]:
