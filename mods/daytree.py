@@ -167,7 +167,7 @@ class Tools(MainTool, FileHandler):
         # day_num = datetime.datetime.today().weekday()
         # kw = list(datetime.datetime.today().isocalendar())[1] # _cal_n_day
 
-        test_tstk_c = [{"att": [{"": "Name", "v": "DTest"},
+        test_tstk_c = [{"att": [{"t": "Name", "v": "DTest"},
                                 {"t": "type", "v": "quickNote/Habits/Morgen-Rutine 3"},
                                 {"t": "time", "v": "-1:-1:-1:-1"}], "name": "DTest"},
                        ]
