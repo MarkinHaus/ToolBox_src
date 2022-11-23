@@ -21,14 +21,18 @@ class Tools(MainTool, FileHandler):
                     ["designer_input", "Day Tree designer input Stream"],
                     ["save_task_to_bucket", "Day Tree designer jo"],
                     ["get_bucket_today", "Day Tree designer jo"],
+                    ["get_bucket_week", "Day Tree designer jo"],
                     ["save_task_day", "Day Tree designer jo"],
+                    ["save_task_week", "Day Tree designer jo"],
                     ],
             "name": "daytree",
             "Version": self.show_version,
             "designer_input": self.designer_input,
             "save_task_to_bucket": self.save_task_to_bucket,
             "get_bucket_today": self.get_bucket_today,
+            "get_bucket_week": self.get_bucket_week,
             "save_task_day": self.save_task_day,
+            "save_task_week": self.save_task_week,
         }
         FileHandler.__init__(self, "daytree.config", app.id if app else __name__)
         MainTool.__init__(self, load=self.on_start, v=self.version, tool=self.tools,
