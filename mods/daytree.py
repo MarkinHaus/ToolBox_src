@@ -189,8 +189,26 @@ class Tools(MainTool, FileHandler):
             return uid
 
         if len(data["task"]) == 0:
+            tx = self.r_twx(app, uid)
+            self.print(app.MOD_LIST["DB"].tools["set"](["", f"dayTree::tx::{uid}", str(tx)]))
             tx, wx = self._dump_bucket(app, uid)
             day = self._cal_n_day(tx, wx)
             return app.MOD_LIST["DB"].tools["set"](["", f"dayTree::2day::{uid}", str(day)])
         else:
             return app.MOD_LIST["DB"].tools["set"](["", f"dayTree::2day::{uid}", str(data["task"])])
+
+    def r_twx(self, app, uid):
+        tx = self._get_twx("t", app, uid)
+        if len(tx) >= 10:
+            tx = tx[:10]
+            return tx
+        return []
+
+    def _get_twx(self, c, app, uid):
+        cx = app.MOD_LIST["DB"].tools["get"]([f"dayTree::{c}x::{uid}"], app)
+        self.print(f"{c}x={cx}")
+        if cx == "":
+            cx = []
+        else:
+            cx = eval(cx)
+        return cx
