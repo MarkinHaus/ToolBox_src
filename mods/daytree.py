@@ -2,6 +2,8 @@ from typing import Union
 from pydantic import BaseModel
 import datetime
 
+from scipy.constants import day
+
 from mods.mainTool import MainTool, FileHandler, App
 from Style import Style
 
@@ -179,7 +181,7 @@ class Tools(MainTool, FileHandler):
 
         week = []
         for i in range(0, 7):
-            #if len(wx) == 0: # add repeatig task
+            # if len(wx) == 0: # add repeatig task
             #    add_(i+1)
             if len(wx) >= 10:
                 week.append(wx[::-1][:10])
@@ -203,17 +205,15 @@ class Tools(MainTool, FileHandler):
         day = app.MOD_LIST["DB"].tools["get"]([f"dayTree::2day::{uid}"], app)
 
         if day == "":
-            do = True
+            day = []
         else:
             day = eval(day)
-            if len(day) == 0:
-                do = True
-            else:
-                return day
 
-        if do:
-            tx, wx = self._dump_bucket(app, uid)
-            return self._cal_n_day(tx, wx)
+        tx, wx = self._dump_bucket(app, uid)
+        for task in self._cal_n_day(tx, wx):
+            day.append(task)
+
+        return day
 
     def get_bucket_week(self, command, app: App):
         uid, err = self.get_uid(command, app)
@@ -223,17 +223,17 @@ class Tools(MainTool, FileHandler):
         week = app.MOD_LIST["DB"].tools["get"]([f"dayTree::week::{uid}"], app)
 
         if week == "":
-            do = True
+            week = []
         else:
             week = eval(week)
-            if len(week) == 0:
-                do = True
-            else:
-                return week
 
-        if do:
-            tx, wx = self._dump_bucket(app, uid)
-            return self._cal_n_week(tx, wx)
+        tx, wx = self._dump_bucket(app, uid)
+        i = 0
+        for day in self._cal_n_week(tx, wx):
+            for task in day:
+                week[i].append(task)
+            i += 1
+        return week
 
     def get_uid(self, command, app: App):
         if "CLOUDM" not in list(app.MOD_LIST.keys()):
