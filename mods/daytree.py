@@ -136,6 +136,8 @@ class Tools(MainTool, FileHandler):
         # day_num = datetime.datetime.today().weekday()
         # kw = list(datetime.datetime.today().isocalendar())[1]
         tx = app.MOD_LIST["DB"].tools["get"]([f"dayTree::tx::{uid}"], app)  # 1 bf bl
+        print("TXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
+        print(tx)
         if tx == "":
             tx = []
         else:
