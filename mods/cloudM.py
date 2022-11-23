@@ -535,3 +535,7 @@ def validate_jwt(jwt_key: str, jwt_secret: str, aud) -> dict or str:
         return "MissingRequiredClaimError"
     except Exception as e:
         return str(e)
+
+
+# CLOUDM #update-core
+# API_MANAGER start-api main a
