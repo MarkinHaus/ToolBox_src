@@ -175,6 +175,10 @@ class Tools(MainTool, FileHandler):
         for i in range(0, 7):
             if len(wx) == 0:
                 week.append([test_tstk_c])
+                if i == 0:
+                    week.append([test_tstk_c, test_tstk_c,test_tstk_c, test_tstk_c,test_tstk_c, test_tstk_c])
+                if i == 4:
+                    week.append([test_tstk_c, test_tstk_c,test_tstk_c, test_tstk_c,test_tstk_c, test_tstk_c])
             elif len(wx) >= 10:
                 week.append(wx[::-1][:10])
                 wx = wx[:10]
