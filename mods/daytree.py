@@ -135,18 +135,22 @@ class Tools(MainTool, FileHandler):
     def _cal_n_day(self, tx, wx):
         # day_num = datetime.datetime.today().weekday()
         # kw = list(datetime.datetime.today().isocalendar())[1]
+        day = []
         self.print("Ezy mode")
         if len(tx) >= 13:
+            tx = tx[::-1]
             self.print(f"{tx[0]=}")
-            return tx[:10]
+            day = tx[:10]
         else:
+            tx = tx[::-1]
             i = 0
             for t in tx:
                 if i >= 2:
                     break
                 self.print(f"i:{i}tx={t}")
                 i += 1
-            return tx
+            day = tx
+        return day
 
     def get_bucket_today(self, command, app: App):
         uid, err = self.get_uid(command, app)
@@ -197,7 +201,6 @@ class Tools(MainTool, FileHandler):
             self.print(app.MOD_LIST["DB"].tools["set"](["", f"dayTree::tx::{uid}", str(tx)]))
             tx, wx = self._dump_bucket(app, uid)
             day = self._cal_n_day(tx, wx)
-            app.MOD_LIST["DB"].tools["set"](["", f"dayTree::2day::{uid}", str(day)])
 
         app.MOD_LIST["DB"].tools["set"](["", f"dayTree::2day::{uid}", str(day)])
         return day
@@ -217,3 +220,4 @@ class Tools(MainTool, FileHandler):
         else:
             cx = eval(cx)
         return cx
+
