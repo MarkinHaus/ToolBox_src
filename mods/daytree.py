@@ -170,4 +170,5 @@ class Tools(MainTool, FileHandler):
         if err:
             return uid
 
-        return eval(app.MOD_LIST["DB"].tools["set"](["", f"dayTree::2day::{uid}", str(data["task"])]))
+        return app.MOD_LIST["DB"].tools["set"](["", f"dayTree::2day::{uid}", str(data["task"])])
+
