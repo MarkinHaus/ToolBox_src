@@ -171,9 +171,9 @@ class Tools(MainTool, FileHandler):
         def add_(x):
             l = []
             for j in range(x):
-                l.append({"att": [{"t": "Name", "v": j},
+                l.append({"att": [{"t": "Name", "v": f"DTest{j}"},
                                   {"t": "type", "v": "qui"},
-                                  {"t": "time", "v": "-1:-1:-1:-1"}], "name": "DTest"})
+                                  {"t": "time", "v": "-1:-1:-1:-1"}], "name": f"DTest{j}"})
 
             week.append(l)
 
