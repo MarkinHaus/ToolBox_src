@@ -1,5 +1,6 @@
 from typing import Union
 from pydantic import BaseModel
+import datetime
 
 from mods.mainTool import MainTool, FileHandler, App
 from Style import Style
@@ -107,7 +108,7 @@ class Tools(MainTool, FileHandler):
 
     def _dump_bucket(self, app: App, uid):
 
-        bucket = app.MOD_LIST["DB"].tools["get"]([f"dayTree::bucket::{uid}"], app)
+        bucket = app.MOD_LIST["DB"].tools["get"]([f"dayTree::bucket::{uid}"], app)  # 1 bf bl
         self.print("bucket ", bucket)
         if bucket == "":
             bucket = []
@@ -128,23 +129,40 @@ class Tools(MainTool, FileHandler):
             else:
                 tx.append(task)
 
-        day = self._load_save_db(app, f"dayTree::2day::{uid}", tx)
-        if day == tx:
-            tx = self._load_save_db(app, f"dayTree::tx::{uid}", tx)
-            wx = self._load_save_db(app, f"dayTree::wx::{uid}", wx)
-            day.append(tx)
-            day.append(wx)
+        self._load_save_db(app, f"dayTree::wx::{uid}", wx)
+        self._load_save_db(app, f"dayTree::tx::{uid}", tx)
 
-        # do day += wx intelligent
-
-        return day
+    def _cal_n_day(self, app: App, uid):
+        # day_num = datetime.datetime.today().weekday()
+        # kw = list(datetime.datetime.today().isocalendar())[1]
+        tx = app.MOD_LIST["DB"].tools["get"]([f"dayTree::tx::{uid}"], app)  # 1 bf bl
+        if tx == "":
+            tx = []
+        else:
+            tx = eval(tx)
+        self.print("Ezy mode")
+        if len(tx) >= 13:
+            return tx[:10]
+        else:
+            return tx
 
     def get_bucket_today(self, command, app: App):
         uid, err = self.get_uid(command, app)
         if err:
             return uid
 
-        day = self._dump_bucket(app, uid)
+        day = app.MOD_LIST["DB"].tools["get"]([f"dayTree::2day::{uid}"], app)
+        do = False
+        if day == "":
+            do = True
+        else:
+            tx = eval(day)
+            if len(eval(day)) == 0:
+                do = True
+
+        if do:
+            self._dump_bucket(app, uid)
+            day = self._cal_n_day(app, uid)
 
         return day
 
@@ -170,5 +188,9 @@ class Tools(MainTool, FileHandler):
         if err:
             return uid
 
-        return app.MOD_LIST["DB"].tools["set"](["", f"dayTree::2day::{uid}", str(data["task"])])
-
+        if len(data) == 0:
+            self._dump_bucket(app, uid)
+            day = self._cal_n_day(app, uid)
+            return day
+        else:
+            return app.MOD_LIST["DB"].tools["set"](["", f"dayTree::2day::{uid}", str(data["task"])])
