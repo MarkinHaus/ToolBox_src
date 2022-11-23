@@ -191,6 +191,6 @@ class Tools(MainTool, FileHandler):
         if len(data) == 0:
             tx, wx = self._dump_bucket(app, uid)
             day = self._cal_n_day(tx, wx)
-            app.MOD_LIST["DB"].tools["set"](["", f"dayTree::2day::{uid}", str(day)])
+            return app.MOD_LIST["DB"].tools["set"](["", f"dayTree::2day::{uid}", str(day)])
         else:
             return app.MOD_LIST["DB"].tools["set"](["", f"dayTree::2day::{uid}", str(data["task"])])
