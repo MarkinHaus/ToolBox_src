@@ -166,8 +166,8 @@ class Tools(MainTool, FileHandler):
     def _cal_n_week(self, wx):
         # day_num = datetime.datetime.today().weekday()
         # kw = list(datetime.datetime.today().isocalendar())[1] # _cal_n_day
-
-        test_tstk_c = {"att": [{"t": "Name", "v": "DTest"},
+        j = 0
+        test_tstk_c = {"att": [{"t": "Name", "v": f"DTest{j}"},
                                {"t": "type", "v": "quickNote/Habits/Morgen-Rutine 3"},
                                {"t": "time", "v": "-1:-1:-1:-1"}], "name": "DTest"}
 
@@ -176,9 +176,46 @@ class Tools(MainTool, FileHandler):
             if len(wx) == 0:
                 week.append([test_tstk_c])
                 if i == 0:
-                    week.append([test_tstk_c, test_tstk_c,test_tstk_c, test_tstk_c,test_tstk_c, test_tstk_c])
+                    j += 1
+                    week.append([test_tstk_c])
+                    j += 1
+                    week.append([test_tstk_c])
+                    j += 1
+                    week.append([test_tstk_c])
+                    j += 1
+                    week.append([test_tstk_c])
+                    j += 1
+                    week.append([test_tstk_c])
+                    j += 1
+                    week.append([test_tstk_c])
+                    j += 1
+                    week.append([test_tstk_c])
+                    j += 1
+                    week.append([test_tstk_c])
                 if i == 4:
-                    week.append([test_tstk_c, test_tstk_c,test_tstk_c, test_tstk_c,test_tstk_c, test_tstk_c])
+                    week.append([test_tstk_c])
+                    j += 1
+                    week.append([test_tstk_c])
+                    j += 1
+                    week.append([test_tstk_c])
+                    j += 1
+                    week.append([test_tstk_c])
+                    j += 1
+                    week.append([test_tstk_c])
+                    j += 1
+                    week.append([test_tstk_c])
+                if i == 3:
+                    week.append([test_tstk_c])
+                    j += 1
+                    week.append([test_tstk_c])
+                    j += 1
+                    week.append([test_tstk_c])
+                    j += 1
+                    week.append([test_tstk_c])
+                    j += 1
+                    week.append([test_tstk_c])
+                    j += 1
+                    week.append([test_tstk_c])
             elif len(wx) >= 10:
                 week.append(wx[::-1][:10])
                 wx = wx[:10]
