@@ -94,7 +94,6 @@ class Tools(MainTool, FileHandler):
 
     def _load_save_db(self, app: App, db_key, data):
         bucket = app.MOD_LIST["DB"].tools["get"]([f"dayTree::{db_key}"], app)
-        self.print("", bucket)
         if bucket == "":
             bucket = []
         else:
@@ -109,14 +108,14 @@ class Tools(MainTool, FileHandler):
     def _dump_bucket(self, app: App, uid):
 
         bucket = app.MOD_LIST["DB"].tools["get"]([f"dayTree::bucket::{uid}"], app)  # 1 bf bl
-        self.print("bucket ", bucket)
         if bucket == "":
             bucket = []
         else:
             bucket = eval(bucket)
             app.MOD_LIST["DB"].tools["set"](["", f"dayTree::bucket::{uid}", str([])])
+
+        self.print("bucket - len : ", len(bucket))
         wx, tx = [], []
-        print("bucket ", bucket)
         for task in bucket:
             if "time" in task["att"]:
                 wx.append(task)
@@ -141,7 +140,12 @@ class Tools(MainTool, FileHandler):
             self.print(f"{tx[0]=}")
             return tx[:10]
         else:
-            self.print(f"{tx=}")
+            i = 0
+            for t in tx:
+                if i >= 2:
+                    break
+                self.print(f"i:{i}tx={t}")
+                i += 1
             return tx
 
     def get_bucket_today(self, command, app: App):
