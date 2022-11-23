@@ -142,8 +142,10 @@ class Tools(MainTool, FileHandler):
             tx = eval(tx)
         self.print("Ezy mode")
         if len(tx) >= 13:
+            self.print(f"{tx[3]=}")
             return tx[:10]
         else:
+            self.print(f"{tx=}")
             return tx
 
     def get_bucket_today(self, command, app: App):
@@ -152,19 +154,19 @@ class Tools(MainTool, FileHandler):
             return uid
 
         day = app.MOD_LIST["DB"].tools["get"]([f"dayTree::2day::{uid}"], app)
-        do = False
+
         if day == "":
             do = True
         else:
             day = eval(day)
             if len(day) == 0:
                 do = True
+            else:
+                return day
 
         if do:
             self._dump_bucket(app, uid)
-            day = self._cal_n_day(app, uid)
-
-        return day
+            return self._cal_n_day(app, uid)
 
     def get_uid(self, command, app: App):
         if "CLOUDM" not in list(app.MOD_LIST.keys()):
