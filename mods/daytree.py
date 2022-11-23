@@ -179,7 +179,7 @@ class Tools(MainTool, FileHandler):
 
         tx, wx = self._dump_bucket(app, uid)
         week = []
-        for i in range(0, 6):
+        for i in range(0, 7):
             day = []
             if len(wx) != 0 or len(tx) != 0:
                 day, tx, wx = self._get_day_x(wx, tx)
