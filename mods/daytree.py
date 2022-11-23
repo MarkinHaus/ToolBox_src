@@ -179,9 +179,9 @@ class Tools(MainTool, FileHandler):
 
         week = []
         for i in range(0, 7):
-            if len(wx) == 0:
-                add_(i+1)
-            elif len(wx) >= 10:
+            #if len(wx) == 0: # add repeatig task
+            #    add_(i+1)
+            if len(wx) >= 10:
                 week.append(wx[::-1][:10])
                 wx = wx[:10]
             else:
