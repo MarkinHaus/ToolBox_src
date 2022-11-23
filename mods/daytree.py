@@ -157,7 +157,7 @@ class Tools(MainTool, FileHandler):
             do = True
         else:
             day = eval(day)
-            if len(eval(day)) == 0:
+            if len(day) == 0:
                 do = True
 
         if do:
