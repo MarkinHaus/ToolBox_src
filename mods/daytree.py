@@ -138,10 +138,6 @@ class Tools(MainTool, FileHandler):
         # kw = list(datetime.datetime.today().isocalendar())[1]
         print("TXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
         print(tx)
-        if tx == "":
-            tx = []
-        else:
-            tx = eval(tx)
         self.print("Ezy mode")
         if len(tx) >= 13:
             self.print(f"{tx[3]=}")
