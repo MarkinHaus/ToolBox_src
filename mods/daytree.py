@@ -115,6 +115,11 @@ class Tools(MainTool, FileHandler):
             app.MOD_LIST["DB"].tools["set"](["", f"dayTree::bucket::{uid}", str([])])
 
         self.print("bucket - len : ", len(bucket))
+        tx, wx = self._sort_tx_wx(bucket)
+        return self._append_tx_wx(app, uid, tx, wx)
+
+    @staticmethod
+    def _sort_tx_wx(bucket):
         wx, tx = [], []
         for task in bucket:
             if "time" in task["att"]:
@@ -127,7 +132,9 @@ class Tools(MainTool, FileHandler):
                 wx.append(task)
             else:
                 tx.append(task)
+        return tx, wx
 
+    def _append_tx_wx(self, app, uid, tx, wx):
         wx = self._load_save_db(app, f"dayTree::wx::{uid}", wx)
         tx = self._load_save_db(app, f"dayTree::tx::{uid}", tx)
         return tx, wx
@@ -152,6 +159,14 @@ class Tools(MainTool, FileHandler):
             day = tx
         return day
 
+    def _cal_n_week(self, tx, wx):
+        # day_num = datetime.datetime.today().weekday()
+        # kw = list(datetime.datetime.today().isocalendar())[1] # _cal_n_day
+        week = []
+        for i in range(0, 7):
+            week.append(self._cal_n_day(tx, wx))
+        return week
+
     def get_bucket_today(self, command, app: App):
         uid, err = self.get_uid(command, app)
         if err:
@@ -171,6 +186,26 @@ class Tools(MainTool, FileHandler):
         if do:
             tx, wx = self._dump_bucket(app, uid)
             return self._cal_n_day(tx, wx)
+
+    def get_bucket_week(self, command, app: App):
+        uid, err = self.get_uid(command, app)
+        if err:
+            return uid
+
+        week = app.MOD_LIST["DB"].tools["get"]([f"dayTree::week::{uid}"], app)
+
+        if week == "":
+            do = True
+        else:
+            week = eval(week)
+            if len(week) == 0:
+                do = True
+            else:
+                return week
+
+        if do:
+            tx, wx = self._dump_bucket(app, uid)
+            return self._cal_n_week(tx, wx)
 
     def get_uid(self, command, app: App):
         if "CLOUDM" not in list(app.MOD_LIST.keys()):
@@ -205,6 +240,32 @@ class Tools(MainTool, FileHandler):
         app.MOD_LIST["DB"].tools["set"](["", f"dayTree::2day::{uid}", str(day)])
         return day
 
+    def save_task_week(self, command, app: App):
+
+        data = command[0].data
+        uid, err = self.get_uid(command, app)
+
+        if err:
+            return uid
+
+        week = data["week"]
+        self.print("Lazy save_task_week")
+        # tx = []
+        # for i in range(0, 7):
+        #     tx = self.r_twx(app, uid)
+
+        tx, wx = [], []
+        for i, day in enumerate(week):
+            self.print(f"sorting:{i} - len {len(day)}")
+            _tx, _wx = self._sort_tx_wx(day)
+            for t in _tx:
+                tx.append(t)
+
+        self.print(app.MOD_LIST["DB"].tools["set"](["", f"dayTree::tx::{uid}", str(tx)]))
+
+        self.print(app.MOD_LIST["DB"].tools["set"](["", f"dayTree::week::{uid}", str(week)]))
+        return "week"
+
     def r_twx(self, app, uid):
         tx = self._get_twx("t", app, uid)
         if len(tx) >= 10:
@@ -220,4 +281,3 @@ class Tools(MainTool, FileHandler):
         else:
             cx = eval(cx)
         return cx
-
