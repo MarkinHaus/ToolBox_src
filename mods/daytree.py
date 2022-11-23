@@ -145,6 +145,23 @@ class Tools(MainTool, FileHandler):
         tx = self._load_save_db(app, f"tx::{uid}", tx)
         return tx, wx
 
+    def _get_day_x(self, wx, tx):
+        self.print("")
+        day = []
+        if len(wx) >= 10:
+            day.append(wx[::-1][:10])
+            wx = wx[:10]
+        else:
+            day.append(wx[::-1])
+            wx = []
+        if len(tx) >= 10:
+            day.append(tx[::-1][:10])
+            tx = tx[:10]
+        else:
+            day.append(tx[::-1])
+            tx = []
+        return day, wx, tx
+
     def _cal_n_day(self, tx, wx):
         # day_num = datetime.datetime.today().weekday()
         # kw = list(datetime.datetime.today().isocalendar())[1]
@@ -192,14 +209,8 @@ class Tools(MainTool, FileHandler):
         if err:
             return uid
 
-        day = app.MOD_LIST["DB"].tools["get"]([f"dayTree::2day::{uid}"], app)
-
-        if day == "":
-            day = []
-        else:
-            day = eval(day)
-
         tx, wx = self._dump_bucket(app, uid)
+        day, tx, wx = self._get_day_x(wx, tx)
         for task in self._cal_n_day(tx, wx):
             day.append(task)
 
@@ -210,19 +221,13 @@ class Tools(MainTool, FileHandler):
         if err:
             return uid
 
-        week = app.MOD_LIST["DB"].tools["get"]([f"dayTree::week::{uid}"], app)
-
-        if week == "":
-            week = []
-        else:
-            week = eval(week)
-
         tx, wx = self._dump_bucket(app, uid)
-        i = 0
-        for day in self._cal_n_week(tx, wx):
+        week = []
+        for i in range(0, 6):
+            day, tx, wx = self._get_day_x(wx, tx)
             for task in day:
                 week[i].append(task)
-            i += 1
+
         return week
 
     def get_uid(self, command, app: App):
@@ -250,12 +255,13 @@ class Tools(MainTool, FileHandler):
         day = data["task"]
 
         if len(day) == 0:
-            tx = self.r_twx(app, uid)
-            self.print(app.MOD_LIST["DB"].tools["set"](["", f"dayTree::tx::{uid}", str(tx)]))
             tx, wx = self._dump_bucket(app, uid)
-            day = self._cal_n_day(tx, wx)
+            day, tx, wx = self._get_day_x(wx, tx)
+            for task in self._cal_n_day(tx, wx):
+                day.append(task)
+            self.print(app.MOD_LIST["DB"].tools["set"](["", f"dayTree::tx::{uid}", str(tx)]))
+            self.print(app.MOD_LIST["DB"].tools["set"](["", f"dayTree::wx::{uid}", str(wx)]))
 
-        app.MOD_LIST["DB"].tools["set"](["", f"dayTree::2day::{uid}", str(day)])
         return day
 
     def save_task_week(self, command, app: App):
@@ -280,8 +286,8 @@ class Tools(MainTool, FileHandler):
                 tx.append(t)
 
         self.print(app.MOD_LIST["DB"].tools["set"](["", f"dayTree::tx::{uid}", str(tx)]))
-
         self.print(app.MOD_LIST["DB"].tools["set"](["", f"dayTree::week::{uid}", str(week)]))
+
         return "week"
 
     def r_twx(self, app, uid):
