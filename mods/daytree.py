@@ -141,8 +141,8 @@ class Tools(MainTool, FileHandler):
         return tx, wx
 
     def _append_tx_wx(self, app, uid, tx, wx):
-        wx = self._load_save_db(app, f"dayTree::wx::{uid}", wx)
-        tx = self._load_save_db(app, f"dayTree::tx::{uid}", tx)
+        wx = self._load_save_db(app, f"wx::{uid}", wx)
+        tx = self._load_save_db(app, f"tx::{uid}", tx)
         return tx, wx
 
     def _cal_n_day(self, tx, wx):
@@ -168,16 +168,6 @@ class Tools(MainTool, FileHandler):
     def _cal_n_week(self, tx, wx):
         # day_num = datetime.datetime.today().weekday()
         # kw = list(datetime.datetime.today().isocalendar())[1] # _cal_n_day
-        j = 0
-
-        def add_(x):
-            l = []
-            for j in range(x):
-                l.append({"att": [{"t": "Name", "v": f"DTest{j}"},
-                                  {"t": "type", "v": "qui"},
-                                  {"t": "time", "v": "-1:-1:-1:-1"}], "name": f"DTest{j}"})
-
-            week.append(l)
 
         week = []
         for i in range(0, 7):
