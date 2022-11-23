@@ -146,20 +146,22 @@ class Tools(MainTool, FileHandler):
         return tx, wx
 
     def _get_day_x(self, wx, tx):
-        self.print("")
         day = []
         if len(wx) >= 10:
-            day.append(wx[::-1][:10])
+            ts = wx[::-1][:10]
             wx = wx[:10]
         else:
-            day.append(wx[::-1])
+            ts = wx[::-1]
             wx = []
         if len(tx) >= 10:
-            day.append(tx[::-1][:10])
+            ts = tx[::-1][:10]
             tx = tx[:10]
         else:
-            day.append(tx[::-1])
+            ts = tx[::-1]
             tx = []
+
+        for t in ts:
+            day.append(t)
         return day, wx, tx
 
     def get_bucket_today(self, command, app: App):
