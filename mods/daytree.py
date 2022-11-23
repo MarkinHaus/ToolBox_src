@@ -136,11 +136,9 @@ class Tools(MainTool, FileHandler):
     def _cal_n_day(self, tx, wx):
         # day_num = datetime.datetime.today().weekday()
         # kw = list(datetime.datetime.today().isocalendar())[1]
-        print("TXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
-        print(tx)
         self.print("Ezy mode")
         if len(tx) >= 13:
-            self.print(f"{tx[3]=}")
+            self.print(f"{tx[0]=}")
             return tx[:10]
         else:
             self.print(f"{tx=}")
@@ -188,14 +186,17 @@ class Tools(MainTool, FileHandler):
         if err:
             return uid
 
-        if len(data["task"]) == 0:
+        day = data["task"]
+
+        if len(day) == 0:
             tx = self.r_twx(app, uid)
             self.print(app.MOD_LIST["DB"].tools["set"](["", f"dayTree::tx::{uid}", str(tx)]))
             tx, wx = self._dump_bucket(app, uid)
             day = self._cal_n_day(tx, wx)
-            return app.MOD_LIST["DB"].tools["set"](["", f"dayTree::2day::{uid}", str(day)])
-        else:
-            return app.MOD_LIST["DB"].tools["set"](["", f"dayTree::2day::{uid}", str(data["task"])])
+            app.MOD_LIST["DB"].tools["set"](["", f"dayTree::2day::{uid}", str(day)])
+
+        app.MOD_LIST["DB"].tools["set"](["", f"dayTree::2day::{uid}", str(day)])
+        return day
 
     def r_twx(self, app, uid):
         tx = self._get_twx("t", app, uid)
