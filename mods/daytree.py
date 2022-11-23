@@ -163,12 +163,24 @@ class Tools(MainTool, FileHandler):
             day = tx
         return day
 
-    def _cal_n_week(self, tx, wx):
+    def _cal_n_week(self, wx):
         # day_num = datetime.datetime.today().weekday()
         # kw = list(datetime.datetime.today().isocalendar())[1] # _cal_n_day
+
+        test_tstk_c = [{"att": [{"": "Name", "v": "DTest"},
+                                {"t": "type", "v": "quickNote/Habits/Morgen-Rutine 3"},
+                                {"t": "time", "v": "-1:-1:-1:-1"}], "name": "DTest"},
+                       ]
         week = []
         for i in range(0, 7):
-            week.append(self._cal_n_day(tx, wx))
+            if len(wx) == 0:
+                week.append([test_tstk_c])
+            elif len(wx) >= 10:
+                week.append(wx[::-1][:10])
+                wx = wx[:10]
+            else:
+                week.append(wx[::-1])
+                wx = []
         return week
 
     def get_bucket_today(self, command, app: App):
@@ -208,8 +220,8 @@ class Tools(MainTool, FileHandler):
                 return week
 
         if do:
-            tx, wx = self._dump_bucket(app, uid)
-            return self._cal_n_week(tx, wx)
+            _, wx = self._dump_bucket(app, uid)
+            return self._cal_n_week(wx)
 
     def get_uid(self, command, app: App):
         if "CLOUDM" not in list(app.MOD_LIST.keys()):
