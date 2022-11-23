@@ -183,7 +183,9 @@ class Tools(MainTool, FileHandler):
             day = []
             if len(wx) != 0 or len(tx) != 0:
                 day, tx, wx = self._get_day_x(wx, tx)
-            week.append(day)
+            week.append([])
+            for t in day:
+                week[i].append(t)
 
         return week
 
