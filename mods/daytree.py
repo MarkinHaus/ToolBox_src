@@ -163,7 +163,7 @@ class Tools(MainTool, FileHandler):
             day = tx
         return day
 
-    def _cal_n_week(self, wx):
+    def _cal_n_week(self, tx, wx):
         # day_num = datetime.datetime.today().weekday()
         # kw = list(datetime.datetime.today().isocalendar())[1] # _cal_n_day
         j = 0
@@ -187,6 +187,12 @@ class Tools(MainTool, FileHandler):
             else:
                 week.append(wx[::-1])
                 wx = []
+            if len(tx) >= 10:
+                week.append(tx[::-1][:10])
+                tx = tx[:10]
+            else:
+                week.append(tx[::-1])
+                tx = []
         return week
 
     def get_bucket_today(self, command, app: App):
@@ -226,8 +232,8 @@ class Tools(MainTool, FileHandler):
                 return week
 
         if do:
-            _, wx = self._dump_bucket(app, uid)
-            return self._cal_n_week(wx)
+            tx, wx = self._dump_bucket(app, uid)
+            return self._cal_n_week(tx, wx)
 
     def get_uid(self, command, app: App):
         if "CLOUDM" not in list(app.MOD_LIST.keys()):
