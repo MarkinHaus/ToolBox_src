@@ -225,6 +225,7 @@ class Tools(MainTool, FileHandler):
         week = []
         for i in range(0, 6):
             day, tx, wx = self._get_day_x(wx, tx)
+            week.append([])
             for task in day:
                 week[i].append(task)
 
