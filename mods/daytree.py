@@ -162,57 +162,13 @@ class Tools(MainTool, FileHandler):
             tx = []
         return day, wx, tx
 
-    def _cal_n_day(self, tx, wx):
-        # day_num = datetime.datetime.today().weekday()
-        # kw = list(datetime.datetime.today().isocalendar())[1]
-        day = []
-        self.print("Ezy mode")
-        if len(tx) >= 13:
-            tx = tx[::-1]
-            self.print(f"{tx[0]=}")
-            day = tx[:10]
-        else:
-            tx = tx[::-1]
-            i = 0
-            for t in tx:
-                if i >= 2:
-                    break
-                self.print(f"i:{i}tx={t}")
-                i += 1
-            day = tx
-        return day
-
-    def _cal_n_week(self, tx, wx):
-        # day_num = datetime.datetime.today().weekday()
-        # kw = list(datetime.datetime.today().isocalendar())[1] # _cal_n_day
-
-        week = []
-        for i in range(0, 7):
-            # if len(wx) == 0: # add repeatig task
-            #    add_(i+1)
-            if len(wx) >= 10:
-                week.append(wx[::-1][:10])
-                wx = wx[:10]
-            else:
-                week.append(wx[::-1])
-                wx = []
-            if len(tx) >= 10:
-                week.append(tx[::-1][:10])
-                tx = tx[:10]
-            else:
-                week.append(tx[::-1])
-                tx = []
-        return week
-
     def get_bucket_today(self, command, app: App):
         uid, err = self.get_uid(command, app)
         if err:
             return uid
 
         tx, wx = self._dump_bucket(app, uid)
-        day, tx, wx = self._get_day_x(wx, tx)
-        for task in self._cal_n_day(tx, wx):
-            day.append(task)
+        day, _, _ = self._get_day_x(wx, tx)
 
         return day
 
@@ -256,8 +212,6 @@ class Tools(MainTool, FileHandler):
         if len(day) == 0:
             tx, wx = self._dump_bucket(app, uid)
             day, tx, wx = self._get_day_x(wx, tx)
-            for task in self._cal_n_day(tx, wx):
-                day.append(task)
             self.print(app.MOD_LIST["DB"].tools["set"](["", f"dayTree::tx::{uid}", str(tx)]))
             self.print(app.MOD_LIST["DB"].tools["set"](["", f"dayTree::wx::{uid}", str(wx)]))
 
