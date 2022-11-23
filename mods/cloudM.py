@@ -424,7 +424,7 @@ class Tools(MainTool):  # FileHandler
 
         user_data_token = app.MOD_LIST["DB"].tools["get"]([f"user::{username}::*"], app)
 
-        user_data: dict = validate_jwt(user_data_token, str(tb_token_jwt, "utf-8"), app.id)
+        user_data: dict = get_jwtdata(user_data_token, str(tb_token_jwt, "utf-8"))
 
         if type(user_data) is str:
             return user_data
@@ -437,7 +437,7 @@ class Tools(MainTool):  # FileHandler
 
         t_username = user_data["username"]
         t_password = user_data["password"]
-
+        print(t_username)
         if t_username != username:
             return "username does not match"
 
