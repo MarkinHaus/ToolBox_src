@@ -129,13 +129,13 @@ class Tools(MainTool, FileHandler):
             else:
                 tx.append(task)
 
-        self._load_save_db(app, f"dayTree::wx::{uid}", wx)
-        self._load_save_db(app, f"dayTree::tx::{uid}", tx)
+        wx = self._load_save_db(app, f"dayTree::wx::{uid}", wx)
+        tx = self._load_save_db(app, f"dayTree::tx::{uid}", tx)
+        return tx, wx
 
-    def _cal_n_day(self, app: App, uid):
+    def _cal_n_day(self, tx, wx):
         # day_num = datetime.datetime.today().weekday()
         # kw = list(datetime.datetime.today().isocalendar())[1]
-        tx = app.MOD_LIST["DB"].tools["get"]([f"dayTree::tx::{uid}"], app)  # 1 bf bl
         print("TXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
         print(tx)
         if tx == "":
@@ -167,8 +167,8 @@ class Tools(MainTool, FileHandler):
                 return day
 
         if do:
-            self._dump_bucket(app, uid)
-            return self._cal_n_day(app, uid)
+            tx, wx = self._dump_bucket(app, uid)
+            return self._cal_n_day(tx, wx)
 
     def get_uid(self, command, app: App):
         if "CLOUDM" not in list(app.MOD_LIST.keys()):
@@ -193,8 +193,8 @@ class Tools(MainTool, FileHandler):
             return uid
 
         if len(data) == 0:
-            self._dump_bucket(app, uid)
-            day = self._cal_n_day(app, uid)
+            tx, wx = self._dump_bucket(app, uid)
+            day = self._cal_n_day(tx, wx)
             return day
         else:
             return app.MOD_LIST["DB"].tools["set"](["", f"dayTree::2day::{uid}", str(data["task"])])
