@@ -147,14 +147,15 @@ class Tools(MainTool, FileHandler):
 
     def _get_day_x(self, wx, tx):
         day = []
+        wx, tx = wx[::-1], tx[::-1]
         if len(wx) >= 10:
-            ts = wx[::-1][:10]
+            ts = wx[:10]
             wx = wx[:10]
         else:
             ts = wx[::-1]
             wx = []
         if len(tx) >= 10:
-            ts = tx[::-1][:10]
+            ts = tx[:10]
             tx = tx[:10]
         else:
             ts = tx[::-1]
@@ -162,6 +163,7 @@ class Tools(MainTool, FileHandler):
 
         for t in ts:
             day.append(t)
+        wx, tx = wx[::-1], tx[::-1]
         return day, wx, tx
 
     def get_bucket_today(self, command, app: App):
@@ -182,13 +184,13 @@ class Tools(MainTool, FileHandler):
         tx, wx = self._dump_bucket(app, uid)
         week = []
         print(f"{tx=}\n{wx=}")
-        for i in range(0, 7):
+        for i in range(1, 8):
             week.append([])
             if len(wx) != 0 or len(tx) != 0:
                 day, tx, wx = self._get_day_x(wx, tx)
                 print(f"{tx=}\n{wx=}\n{day=}")
                 for t in day:
-                    week[i].append(t)
+                    week[i - 1].append(t)
 
         return week
 

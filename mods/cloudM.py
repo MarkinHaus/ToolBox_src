@@ -507,7 +507,7 @@ def crate_sing_key(username: str, email: str, password: str, uid: str, message: 
     message['uid'] = uid
     message['aud'] = app.id if app else "-1"
 
-    jwt_ket = jwt.encode(message, jwt_secret, headers={"aud": app.id if app else "-1"}, algorithm="HS512")
+    jwt_ket = jwt.encode(message, jwt_secret, algorithm="HS512")
     return jwt_ket
 
 
