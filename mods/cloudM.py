@@ -424,7 +424,7 @@ class Tools(MainTool):  # FileHandler
 
         user_data_token = app.MOD_LIST["DB"].tools["get"]([f"user::{username}::*"], app)
 
-        user_data: dict = get_jwtdata(user_data_token, str(tb_token_jwt, "utf-8"))
+        user_data: dict = get_jwtdata(user_data_token, str(tb_token_jwt, "utf-8"), app.id)
 
         if type(user_data) is str:
             return user_data
@@ -511,10 +511,10 @@ def crate_sing_key(username: str, email: str, password: str, uid: str, message: 
     return jwt_ket
 
 
-def get_jwtdata(jwt_key: str, jwt_secret: str):
+def get_jwtdata(jwt_key: str, jwt_secret: str, aud):
     try:
         token = jwt.decode(jwt_key, jwt_secret, leeway=timedelta(seconds=10),
-                           algorithms=["HS512"], verify=False)
+                           algorithms=["HS512"], verify=False, audience=aud)
         return token
     except jwt.exceptions.InvalidSignatureError:
         return "InvalidSignatureError"
