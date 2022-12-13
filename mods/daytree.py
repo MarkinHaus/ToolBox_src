@@ -149,7 +149,7 @@ class Tools(MainTool, FileHandler):
         wx, tx = [], []
 
         for task in bucket:
-            wx_task = self._wx_format_task(task.clone())
+            wx_task = self._wx_format_task(task)
             cal = self._calculate_cal(wx_task, [0, 0])
             if cal > 0:
                 wx.append(task)
@@ -198,7 +198,7 @@ class Tools(MainTool, FileHandler):
             {
                 'name': item['name'],
                 'index': i,
-                'id': item['id'],
+                'id': item['id'] if 'id' in item.keys() else 0,
                 'priority': item['priority'] if 'priority' in item.keys() else 0,
                 'cal': self._calculate_cal(item, r),
             }
