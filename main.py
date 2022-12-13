@@ -95,13 +95,9 @@ def user_input(app):
     return print_command
 
 
-def main(app, img):
+def main(app):
     mode = "live"
-    r = 0
     while app.alive:
-        r += 1
-        if r % 10 == 0:
-            img()
         print("", end="" + "->>\r")
         command = user_input(app)
 
@@ -232,9 +228,7 @@ if __name__ == '__main__':
 
     tb_app.load_all_mods_in_file()
 
-    tb_img = tb_app.MOD_LIST["WELCOME"].tools["printT"]
-    tb_img()
-    main(tb_app, tb_img)
+    main(tb_app)
     print("\n\n\n\tSee u")
 
 #    MACRO = ['HELP', 'LOAD-MOD', 'LOGS', 'EXIT', '_hr', '..', 'TEST']2
