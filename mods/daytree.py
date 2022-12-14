@@ -305,10 +305,10 @@ class Tools(MainTool, FileHandler):
 
         res = app.MOD_LIST["CLOUDM"].tools["validate_jwt"](command, app)
 
-        if type(res) is str:
+        if isinstance(res, str):
             return res, True
 
-        if type(res) is not dict:
+        if not isinstance(res, dict):
             return res, True
 
         if "res" in res.keys():
