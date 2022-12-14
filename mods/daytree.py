@@ -58,7 +58,7 @@ class Tools(MainTool, FileHandler):
                                     "Erinnerung.",
                                     "Ich muss eine Bestimmte aufgebe Erledigen, es handelt sich um eine Aufgabe."],
 
-                           'vg_list': {'time': ['time', 'uhr', 'zeit'],
+                           'vg_ob': {'time': ['time', 'uhr', 'zeit'],
                                        'due_date': ['due_date', 'datum', 'date'],
                                        'day': ['tag', 'day'],
                                        'week': ['week', 'kw'],
@@ -66,12 +66,12 @@ class Tools(MainTool, FileHandler):
                                        'cal': ['cal'], }
                            }
 
-        self.config['vg_list'] = {'time': ['time', 'uhr', 'zeit'],
+        self.config['vg_ob'] = {'time': ['time', 'uhr', 'zeit'],
                                   'due_date': ['due_date', 'datum', 'date'],
                                   'day': ['tag', 'day'],
                                   'week': ['week', 'kw'],
                                   'priority': ['priority', 'P#', '!'],
-                                  'cal': ['cal'], } if "vg_list" not in self.config.keys() else self.config['vg_list']
+                                  'cal': ['cal'], } if "vg_ob" not in self.config.keys() else self.config['vg_ob']
 
     def on_exit(self):
         self.add_to_save_file_handler(self.keys["Config"], str(self.config))
