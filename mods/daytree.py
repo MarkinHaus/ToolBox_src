@@ -65,13 +65,13 @@ class Tools(MainTool, FileHandler):
                                        'priority': ['priority', 'P#', '!'],
                                        'cal': ['cal'], }
                            }
-        # TODO : Config Editor
+
         self.config['vg_list'] = {'time': ['time', 'uhr', 'zeit'],
                                   'due_date': ['due_date', 'datum', 'date'],
                                   'day': ['tag', 'day'],
                                   'week': ['week', 'kw'],
                                   'priority': ['priority', 'P#', '!'],
-                                  'cal': ['cal'], }
+                                  'cal': ['cal'], } if "vg_list" not in self.config.keys() else self.config['vg_list']
 
     def on_exit(self):
         self.add_to_save_file_handler(self.keys["Config"], str(self.config))
@@ -306,6 +306,15 @@ class Tools(MainTool, FileHandler):
         res = app.MOD_LIST["CLOUDM"].tools["validate_jwt"](command, app)
 
         if type(res) is str:
+            return res, True
+
+        if type(res) is not dict:
+            return res, True
+
+        if "res" in res.keys():
+            res = res["res"]
+
+        if "uid" not in res.keys():
             return res, True
 
         return res["uid"], False

@@ -35,6 +35,7 @@ class Tools(MainTool, FileHandler):
                     ["new-sug", "Add New Question or Class to Config"],
                     ["run-sug", "Run Huggingface Pipeline"],
                     ["info", "Show Config"],
+                    ["lode", "lode models"],
                     ],
             "name": "isaa",
             "Version": self.show_version,
@@ -44,6 +45,7 @@ class Tools(MainTool, FileHandler):
             "new-sug": self.new_sub_grop,
             "run-sug": self.run_sug,
             "info": self.info,
+            "lode": self.lode_models,
         }
 
         FileHandler.__init__(self, "issa.config", app.id if app else __name__)
@@ -60,26 +62,29 @@ class Tools(MainTool, FileHandler):
         if config is not None:
             self.config = eval(config)
 
-            start_time = time.time()
-            stf = "all-MiniLM-L6-v2"
-            dia = "microsoft/DialoGPT-large"
-            if "ai-config" in self.config:
-                ai_config = self.config["ai-config"]
-                stf = ai_config["SentenceTransformer"]
-                dia = ai_config["Dialog"]
-            else:
-                self.config["ai-config"] = {"SentenceTransformer": stf, "Dialog": dia}
-            start_time_dia = time.time()
-            self.add_tmk(["", "DiA", dia, "wmhtkz"])
-            process_time_dia = time.time() - start_time_dia
-            start_time_stf = time.time()
-            self.add_tmk(["", "Stf", stf, "stf"])
-            process_time_stf = time.time() - start_time_stf
-            process_time_total = time.time() - start_time
+    def lode_models(self):
 
-            self.print(
-                f"Processing time :\n\tTotal {process_time_total:.2f} seconds\n\tDia {process_time_dia:.2f} seconds\n\t"
-                f"Stf {process_time_stf:.2f} seconds")
+        start_time = time.time()
+        stf = "all-MiniLM-L6-v2"
+        dia = "microsoft/DialoGPT-large"
+        if "ai-config" in self.config:
+            ai_config = self.config["ai-config"]
+            stf = ai_config["SentenceTransformer"]
+            dia = ai_config["Dialog"]
+        else:
+            self.config["ai-config"] = {"SentenceTransformer": stf, "Dialog": dia}
+        start_time_dia = time.time()
+        self.add_tmk(["", "DiA", dia, "wmhtkz"])
+        process_time_dia = time.time() - start_time_dia
+        start_time_stf = time.time()
+        self.add_tmk(["", "Stf", stf, "stf"])
+        process_time_stf = time.time() - start_time_stf
+        process_time_total = time.time() - start_time
+        self.print(
+            f"Processing time :\n\tTotal {process_time_total:.2f} seconds\n\tDia {process_time_dia:.2f} seconds\n\t"
+            f"Stf {process_time_stf:.2f} seconds")
+
+        return "Done!"
 
     def add_tmk(self, command):
         if len(command) < 2:

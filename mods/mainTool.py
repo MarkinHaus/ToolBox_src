@@ -36,6 +36,7 @@ class MainTool:
         self.logs.append([self, message])
 
 
+
 class Code:
     @staticmethod
     def decode_code(data):
@@ -69,7 +70,7 @@ class Code:
         #            encode_str += str(i / 2) + '#'
         #    data_st += 1
         # return encode_str
-        return data
+        return str(data)
 
 
 class FileHandler(Code):
@@ -84,7 +85,7 @@ class FileHandler(Code):
         self.file_handler_index_ = -1
         self.file_handler_file_prefix = f".{filename.split('.')[1]}/{name.replace('.', '-')}/"
 
-    def open_file_handler(self, mode: str, rdu):
+    def _open_file_handler(self, mode: str, rdu):
         if self.file_handler_storage:
             self.file_handler_storage.close()
         try:
@@ -106,11 +107,11 @@ class FileHandler(Code):
             rdu()
 
     def open_s_file_handler(self):
-        self.open_file_handler('w+', self.open_s_file_handler)
+        self._open_file_handler('w+', self.open_s_file_handler)
         return self
 
     def open_l_file_handler(self):
-        self.open_file_handler('r+', self.open_l_file_handler)
+        self._open_file_handler('r+', self.open_l_file_handler)
         return self
 
     def save_file_handler(self):
@@ -118,6 +119,7 @@ class FileHandler(Code):
             if self.file_handler_auto_save[data]:
                 self.add_to_save_file_handler(data, self.file_handler_load[pos][1])
         if not self.file_handler_storage:
+            # self.open_s_file_handler()
             print("WARNING pleas open storage")
         for line in self.file_handler_save:
             self.file_handler_storage.write(line)
@@ -130,13 +132,14 @@ class FileHandler(Code):
             print('WARNING: key length is not 10 characters')
             return
         try:
-            self.set_auto_save_file_handler(key)
+            self._set_auto_save_file_handler(key)
             self.file_handler_save.append(key + self.encode_code(value))
         except ValueError:
             print(Style.RED(f"{value=}\n\n{key=} was not saved.\n{type(value)=}!=str"))
 
     def load_file_handler(self):
         if not self.file_handler_storage:
+            # self.open_l_file_handler()
             print("WARNING pleas open storage")
         for line in self.file_handler_storage:
             line = line[:-1]
@@ -147,7 +150,7 @@ class FileHandler(Code):
             self.file_handler_load.append(append)
         return self
 
-    def set_auto_save_file_handler(self, key: str):
+    def _set_auto_save_file_handler(self, key: str):
         self.file_handler_auto_save[key] = False
 
     def get_file_handler(self, obj: str) -> str or None:
@@ -178,12 +181,12 @@ class App:
             "module-load-mode": "load~mode:",
         }
 
-        self.MACRO = self.get_config_data("MACRO", ['HELP', 'LOAD-MOD', 'LOGS', 'EXIT', '_hr', '..', 'cls', 'mode'])
-        self.MACRO_color = self.get_config_data("MACRO_C", {'HELP': 'GREEN', 'LOAD-MOD': 'BLUE', 'EXIT': 'RED',
-                                                            'monit': 'YELLOW', '..': 'MAGENTA', 'LOGS': 'MAGENTA',
-                                                            'cls': 'WHITE'
-                                                            })
-        self.HELPER = self.get_config_data("HELPER", {
+        self.MACRO = self.get_config_data("MACRO", [])  # 'HELP', 'LOAD-MOD', 'LOGS', 'EXIT', '_hr', '..', 'cls', 'mode'
+        self.MACRO_color = self.get_config_data("MACRO_C", {})  # 'HELP': 'GREEN', 'LOAD-MOD': 'BLUE', 'EXIT': 'RED',
+        # 'monit': 'YELLOW', '..': 'MAGENTA', 'LOGS': 'MAGENTA', 'cls': 'WHITE'
+
+        self.HELPER = self.get_config_data("HELPER", {})
+        """
             'HELP': [['Information', 'version : 0.1.0', 'color : GREEN', 'syntax : help [command]',
                       'help is available in all subsets']],
             'LOAD-MOD': [['Information', 'version : 0.1.0', 'color : BLUE', 'syntax : LOAD-MOD [filename]',
@@ -199,7 +202,7 @@ class App:
             'mode': [['Information', 'version : ----', 'go in monit mode']],
             'app-info': [['Information', 'version : ----', 'app - status - info']],
             'mode:debug': [['Test Function', 'version : ----', Style.RED('Code can crash')]]
-        })
+        """
 
         self.id = self.get_config_data("id", [name])[0]
         self.stuf_load = self.get_config_data("st-load", False)
@@ -213,12 +216,10 @@ class App:
         self.alive = True
         self.debug = self.get_config_data("debug", False)
 
+
         print("SYSTEM :; " + node())
 
     def save_exit(self):
-
-        if self.test_repeat():
-            self.config_fh.add_to_save_file_handler(self.keys["HELPER"], str(self.HELPER))
 
         if self.test_repeat():
             self.config_fh.add_to_save_file_handler(self.keys["MACRO"], str(self.MACRO))
@@ -244,6 +245,13 @@ class App:
         if self.config_fh.file_handler_index_ == 0:
             self.debug_print("Darten Wurden Wärend Runtim Entfernt")
         return self.config_fh.file_handler_index_ <= 0
+
+    def test_repeat_ac_mod(self):
+        if self.AC_MOD.file_handler_index_ == -1:
+            self.debug_print("Config - Installation Don")
+        if self.AC_MOD.file_handler_index_ == 0:
+            self.debug_print("Darten Wurden Wärend Runtim Entfernt")
+        return self.AC_MOD.file_handler_index_ <= 0
 
     def get_config_data(self, key, t):
         data = self.config_fh.get_file_handler(self.keys[key])
@@ -278,6 +286,8 @@ class App:
             return self.inplace_load(filename)
         if self.mlm == "C":
             return self.copy_load(filename)
+        else:
+            raise ValueError(f"config mlm must bee I or C is {self.mlm}")
 
     def load_all_mods_in_file(self):
         w_dir = self.id.replace(".", "_")
@@ -342,6 +352,7 @@ class App:
                     self.debug_print(Style.YELLOW(Style.Bold(f"closing ERROR : {e}")))
 
     def remove_mod(self, mod_name):
+
         del self.MOD_LIST[mod_name.upper()]
         del self.MACRO_color[mod_name.upper()]
         del self.HELPER[mod_name.upper()]
@@ -432,6 +443,17 @@ class App:
             print(Style.RED(f"KeyError: {e} function not found 404"))
             return None
 
+    def get_file_handler_name(self):
+        if not self.AC_MOD:
+            self.debug_print(Style.RED("No module Active"))
+            return None
+        try:
+            if self.AC_MOD.file_handler_filename:
+                return self.AC_MOD.file_handler_filename
+        except AttributeError as e:
+            print(Style.RED(f"AttributeError: {e} has no file handler 404"))
+            return None
+
     def run_function(self, name, command):
         # get function
         function = self._get_function(name)
@@ -490,6 +512,8 @@ class App:
             self.SUPER_SET.append(spec[0].upper())
 
     def new_ac_mod(self, name):
+        if name.upper() not in self.MOD_LIST.keys():
+            return f"valid mods ar : {self.MOD_LIST.keys()}"
         self.AC_MOD = self.MOD_LIST[name.upper()]
         self.AC_MOD.stuf = self.stuf_load
         self.PREFIX = Style.CYAN(

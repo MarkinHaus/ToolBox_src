@@ -47,6 +47,7 @@ class Tools(MainTool, FileHandler):
                     ["validate_jwt", "validate a  user - api instance"],
                     ["log_in_user", "log_in user - api instance"],
                     ["download_api_files", "download mods"],
+                    ["get-init-config", "get-init-config mods"],
                     ],
             "name": "cloudM",
             "Version": self.show_version,
@@ -64,6 +65,7 @@ class Tools(MainTool, FileHandler):
             "validate_jwt": self.validate_jwt,
             "download_api_files": self.download_api_files,
             "#update-core": self.update_core,
+            "get-init-config": self.gic,
         }
 
         FileHandler.__init__(self, "modules.config", app.id if app else __name__)
@@ -181,7 +183,7 @@ class Tools(MainTool, FileHandler):
         boilerplate = """from mods.mainTool import MainTool  # , FileHandler
 from Style import Style
 
-  
+
 class Tools(MainTool):  # FileHandler
 
     def __init__(self, app=None):
@@ -198,7 +200,7 @@ class Tools(MainTool):  # FileHandler
         # FileHandler.__init__(self, "File name", app.id if app else __name__)
         MainTool.__init__(self, load=self.on_start, v=self.version, tool=self.tools,
                         name=self.name, logs=self.logs, color=self.color, on_exit=self.on_exit)
-                    
+
     def show_version(self):
         self.print("Version: ", self.version)
 
@@ -412,7 +414,6 @@ class Tools(MainTool):  # FileHandler
             return "Server has no database module"
 
         data = command[0].data
-        token = command[0].token
 
         username = data["username"]
         password = data["password"]
@@ -424,7 +425,7 @@ class Tools(MainTool):  # FileHandler
 
         user_data_token = app.MOD_LIST["DB"].tools["get"]([f"user::{username}::*"], app)
 
-        user_data: dict = get_jwtdata(user_data_token, str(tb_token_jwt, "utf-8"), app.id)
+        user_data: dict = validate_jwt(user_data_token, str(tb_token_jwt, "utf-8"), app.id)
 
         if type(user_data) is str:
             return user_data
@@ -450,13 +451,58 @@ class Tools(MainTool):  # FileHandler
                               gen_token_time({"v": self.version}, 4380),
                               tb_token_jwt, app)
 
-    def validate_jwt(self, command, app: App):
+    def gic(self, command, app: App):  # spec s -> validate token by server x ask max
+
+        data = command[0].data  # {'name': module_name, 'requested_version': version}
+        module_name = data['module_name']
+        if module_name not in list(app.MOD_LIST.keys()):
+            return 'Module not found'
+
+        version_data = app.MOD_LIST[module_name].tools["Version"]()
+        requested_version = data['requested_version']
+        if requested_version not in version_data.keys():
+            return f'requested_version not found Available versions are: {list(version_data.keys())}'
+
+        return version_data[requested_version]
+
+
+    def validate_jwt(self, command, app: App):  # spec s -> validate token by server x ask max
+        res = ''
         if "DB" not in list(app.MOD_LIST.keys()):
-            return "Server has no database module"
+            if not ["passdb"] in command[0].data.keys():
+                return "Server has no database module"
+            res = "no-db"
 
         token = command[0].token
-        tb_token_jwt = app.MOD_LIST["DB"].tools["get"](["jwt-secret-cloudMService"], app)
-        return validate_jwt(token, tb_token_jwt, app.id)
+        data = command[0].data
+
+        if res != "no-db":
+            tb_token_jwt = app.MOD_LIST["DB"].tools["get"](["jwt-secret-cloudMService"], app)
+            res = validate_jwt(token, tb_token_jwt, app.id)
+        if type(res) != str:
+            return token
+        if res in ["InvalidSignatureError", "InvalidAudienceError", "max-p", "no-db"]:
+            # go to next kown server to validate the signature and token
+            version_command = self.get_file_handler(self.keys["URL"])
+            url = "http://194.233.168.22:5000" #"https://simeplm"
+            if version_command is not None:
+                url = version_command
+
+            url += "/post/cloudM/run/validate_jwt?command="
+            self.print(url)
+            j_data = {"token": token,
+                      "data": {
+                          "server-x": app.id,
+                          "pasted": data["pasted"] + 1 if 'pasted' in data.keys() else 0,
+                          "max-p": data["pasted"] - 1 if 'pasted' in data.keys() else 3
+                      }
+                      }
+            if j_data['data']['pasted'] > j_data['data']['max-p']:
+                return "max-p"
+            r = requests.post(url, json=j_data)
+            res = r.json()
+
+        return res
 
     def test_if_exists(self, name: str, app: App):
         if "DB" not in list(app.MOD_LIST.keys()):
@@ -518,6 +564,8 @@ def get_jwtdata(jwt_key: str, jwt_secret: str, aud):
         return token
     except jwt.exceptions.InvalidSignatureError:
         return "InvalidSignatureError"
+    except jwt.exceptions.InvalidAudienceError:
+        return "InvalidAudienceError"
 
 
 def validate_jwt(jwt_key: str, jwt_secret: str, aud) -> dict or str:
@@ -535,7 +583,6 @@ def validate_jwt(jwt_key: str, jwt_secret: str, aud) -> dict or str:
         return "MissingRequiredClaimError"
     except Exception as e:
         return str(e)
-
 
 # CLOUDM #update-core
 # API_MANAGER start-api main a
