@@ -114,8 +114,8 @@ class Tools(MainTool, FileHandler):
                 # Use the scan method to iterate over all keys
                 for key in self.rcon.scan_iter():
                     # Check if the key contains the substring
-                    self.print(f"chak key: {key} ", end="")
-                    if key_ in key:
+                    self.print(f"test: {key} ", end="")
+                    if key_ in str(key, 'utf-8'):
                         # Delete the key if it contains the substring
                         self.rcon.delete(key)
                         self.print(f"DEL")
