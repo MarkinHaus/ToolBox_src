@@ -45,7 +45,7 @@ class Tools(MainTool, FileHandler):  # FileHandler
             self.print(self.api_config[api])
         return self.api_config
 
-    def new_api(self, command):
+    def new_sd(self, command):
         if len(command) <= 2:
             return "invalid command length [api:name mod_list]"
 
