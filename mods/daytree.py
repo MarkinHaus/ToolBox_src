@@ -308,6 +308,8 @@ class Tools(MainTool, FileHandler):
         if isinstance(res, str):
             return res, True
 
+        self.print(res)
+
         if not isinstance(res, dict):
             return res, True
 
