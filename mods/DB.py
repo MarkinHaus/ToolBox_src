@@ -103,6 +103,22 @@ class Tools(MainTool, FileHandler):
 
         if len(ind) == 2:
             key = ind[1]
-            self.rcon.delete(key)
-
+            e = self.rcon.delete(key)
+            self.print(f"{e}]")
             self.print(f"key: {key} DEL")
+
+        if len(ind) == 3:
+            key_ = ind[1]
+            all = ind[2] == "*"
+            if all:
+                # Use the scan method to iterate over all keys
+                for key in self.rcon.scan_iter():
+                    # Check if the key contains the substring
+                    self.print(f"chak key: {key} ", end="")
+                    if key_ in key:
+                        # Delete the key if it contains the substring
+                        self.rcon.delete(key)
+                        self.print(f"DEL")
+            self.print(f"Finished")
+
+        self.print(f"function end")
