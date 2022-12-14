@@ -177,10 +177,10 @@ class Tools(MainTool, FileHandler):
     def _calculate_cal(self, item, r):
         days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
         priority = item['priority'] if 'priority' in item.keys() else 0
-        kw = int(datetime.strptime(item['due_date'], '%Y-%m-%d').strftime('%W')) if 'due_date' in item.keys() else (
+        kw = int(datetime.strptime(str(item['due_date']), '%Y-%m-%d').strftime('%W')) if 'due_date' in item.keys() and str(item['due_date']) != "0" else (
             item['week'] if 'week' in item.keys() else 0)
         day = int(days.index(
-            datetime.strptime(item['due_date'], '%Y-%m-%d').strftime('%A'))) if 'due_date' in item.keys() else (
+            datetime.strptime(str(item['due_date']), '%Y-%m-%d').strftime('%A'))) if 'due_date' in item.keys() and str(item['due_date']) != "0" else (
             item['day'] if 'day' in item.keys() else -1)
 
         now = datetime.now()
@@ -221,7 +221,7 @@ class Tools(MainTool, FileHandler):
 
         due_date = data["due_date"]
         # Fälligkeitsdatum als Datetime-Objekt umwandeln
-        due_date_dt = datetime.strptime(due_date, '%Y-%m-%d')
+        due_date_dt = datetime.strptime(str(due_date), '%Y-%m-%d')
 
         # Kalenderwoche und Tag aus dem Datetime-Objekt extrahieren
         week = due_date_dt.strftime('%W')
@@ -270,7 +270,7 @@ class Tools(MainTool, FileHandler):
         if err:
             return uid
 
-        day = self._load_save_db(app, f"day::{uid}", [])
+        day = self._load_save_db(app, f"day::{uid}", [])[0]
 
         if len(day) == 0:
             wx, tx = self._dump_bucket(app, uid)

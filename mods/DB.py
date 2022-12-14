@@ -60,12 +60,10 @@ class Tools(MainTool, FileHandler):
 
     def get_keys(self, command_, app: App):
 
-        print(command_)
         command = command_[0]
         if command == "get":
             command = command_[1]
 
-        print(command)
         if command == "all":
             for key in self.rcon.scan_iter():
                 val = self.rcon.get(key)
@@ -78,7 +76,6 @@ class Tools(MainTool, FileHandler):
             val = ""
             for key in self.rcon.scan_iter(command):
                 val = self.rcon.get(key)
-                print(f"{key} = {val}")
 
             # self.print(self.check(command, app), val, app.id)
             if self.check(command, app):
