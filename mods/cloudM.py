@@ -465,7 +465,6 @@ class Tools(MainTool):  # FileHandler
 
         return version_data[requested_version]
 
-
     def validate_jwt(self, command, app: App):  # spec s -> validate token by server x ask max
         res = ''
         if "DB" not in list(app.MOD_LIST.keys()):
@@ -480,7 +479,7 @@ class Tools(MainTool):  # FileHandler
             tb_token_jwt = app.MOD_LIST["DB"].tools["get"](["jwt-secret-cloudMService"], app)
             res = validate_jwt(token, tb_token_jwt, app.id)
         if type(res) != str:
-            return token
+            return res
         if res in ["InvalidSignatureError", "InvalidAudienceError", "max-p", "no-db"]:
             # go to next kown server to validate the signature and token
             version_command = self.get_file_handler(self.keys["URL"])
