@@ -36,7 +36,6 @@ class MainTool:
         self.logs.append([self, message])
 
 
-
 class Code:
     @staticmethod
     def decode_code(data):
@@ -216,7 +215,6 @@ class App:
         self.alive = True
         self.debug = self.get_config_data("debug", False)
 
-
         print("SYSTEM :; " + node())
 
     def save_exit(self):
@@ -289,9 +287,8 @@ class App:
         else:
             raise ValueError(f"config mlm must bee I or C is {self.mlm}")
 
-    def load_all_mods_in_file(self):
+    def load_all_mods_in_file(self, working_dir="./mods/"):
         w_dir = self.id.replace(".", "_")
-        working_dir = "./mods/"
         if self.mlm == "C":
             if os.path.exists(f"./runtime/{w_dir}/mod_lib"):
                 working_dir = f"./runtime/{w_dir}/mod_lib/"
@@ -309,6 +306,8 @@ class App:
                             self.load_mod(mod[:-3])
                         except Exception as e:
                             print(Style.RED("Error") + f" loading modules : {e}")
+
+        return True
 
     def copy_load(self, mod_name):
         loc = self.pre_lib_mod(mod_name)

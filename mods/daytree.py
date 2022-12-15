@@ -59,19 +59,19 @@ class Tools(MainTool, FileHandler):
                                     "Ich muss eine Bestimmte aufgebe Erledigen, es handelt sich um eine Aufgabe."],
 
                            'vg_ob': {'time': ['time', 'uhr', 'zeit'],
-                                       'due_date': ['due_date', 'datum', 'date'],
-                                       'day': ['tag', 'day'],
-                                       'week': ['week', 'kw'],
-                                       'priority': ['priority', 'P#', '!'],
-                                       'cal': ['cal'], }
+                                     'due_date': ['due_date', 'datum', 'date'],
+                                     'day': ['tag', 'day'],
+                                     'week': ['week', 'kw'],
+                                     'priority': ['priority', 'P#', '!'],
+                                     'cal': ['cal'], }
                            }
 
         self.config['vg_ob'] = {'time': ['time', 'uhr', 'zeit'],
-                                  'due_date': ['due_date', 'datum', 'date'],
-                                  'day': ['tag', 'day'],
-                                  'week': ['week', 'kw'],
-                                  'priority': ['priority', 'P#', '!'],
-                                  'cal': ['cal'], } if "vg_ob" not in self.config.keys() else self.config['vg_ob']
+                                'due_date': ['due_date', 'datum', 'date'],
+                                'day': ['tag', 'day'],
+                                'week': ['week', 'kw'],
+                                'priority': ['priority', 'P#', '!'],
+                                'cal': ['cal'], } if "vg_ob" not in self.config.keys() else self.config['vg_ob']
 
     def on_exit(self):
         self.add_to_save_file_handler(self.keys["Config"], str(self.config))
@@ -103,9 +103,6 @@ class Tools(MainTool, FileHandler):
         return att_list
 
     def save_task_to_bucket(self, command, app: App):
-
-        if len(command) > 2:
-            return {"error": f"Command-invalid-length {len(command)=} | 2 {command}"}
 
         uid, err = self.get_uid(command, app)
         if err:
@@ -151,6 +148,7 @@ class Tools(MainTool, FileHandler):
         for task in bucket:
             wx_task = self._wx_format_task(task)
             cal = self._calculate_cal(wx_task, [0, 0])
+            task['cal'] = cal
             if cal > 0:
                 wx.append(task)
             else:
@@ -163,7 +161,7 @@ class Tools(MainTool, FileHandler):
 
         # Lambda-Funktion zum Hinzufügen von Eigenschaften zu einem Task-Objekt
         add_properties = lambda task, vg_ob: {
-            'id': str(uuid.uuid4()).replace('-', '')[10],  # Zufällige UID generieren
+            'id': str(uuid.uuid4()).replace('-', ''),  # Zufällige UID generieren
 
             # Schleife über die Eigenschaften in vg_ob
             **{prop: next(filter(lambda x: x['t'] in vg_ob[prop], task['att']), {'v': 0})['v']
@@ -175,28 +173,39 @@ class Tools(MainTool, FileHandler):
         return add_properties(task, self.config['vg_ob'])
 
     def _calculate_cal(self, item, r):
+        if not item:
+            return -1
         days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
         priority = item['priority'] if 'priority' in item.keys() else 0
-        kw = int(datetime.strptime(str(item['due_date']), '%Y-%m-%d').strftime('%W')) if 'due_date' in item.keys() and str(item['due_date']) != "0" else (
+        kw = int(
+            datetime.strptime(str(item['due_date']), '%Y-%m-%d').strftime('%W')) if 'due_date' in item.keys() and str(
+            item['due_date']) != "0" else (
             item['week'] if 'week' in item.keys() else 0)
-        day = int(days.index(
-            datetime.strptime(str(item['due_date']), '%Y-%m-%d').strftime('%A'))) if 'due_date' in item.keys() and str(item['due_date']) != "0" else (
+        day = int(days.index((
+            datetime.strptime(str(item['due_date']), '%Y-%m-%d').strftime('%A')))) if 'due_date' in item.keys() and str(
+            item['due_date']) != "0" else (
             item['day'] if 'day' in item.keys() else -1)
 
         now = datetime.now()
         # Kalenderwoche und Tag aus dem Datetime-Objekt extrahieren
-
-        day_rel = day - days.index(now.strftime('%A')) + r[0]  # day_now
-        kw_rel = kw - int(now.strftime('%W')) + r[1]  # kw_now
-
-        return 1 + priority + (kw_rel * 10) + day_rel
+        day_rel = (day - days.index(now.strftime('%A'))) + r[0]  # day_now
+        kw_rel = (kw - int(now.strftime('%W'))) + r[1]  # kw_now
+        if kw == 0:
+            kw_rel = 0
+        if day == -1:
+            kw_rel = 0
+        self.print(
+            f"{priority = } {day_rel = }-{day}-{days.index(now.strftime('%A'))} | {kw_rel = }-{kw}-{int(now.strftime('%W'))} | rel-task-now")
+        c = 1 + priority + day_rel*2.5 + (kw_rel * 10)
+        self.print(f"{priority} + {day_rel*2.5} + {kw_rel * 10} +1 -> {c}")
+        return c
 
     def _sort_wx(self, wx, r):
         if r is None:
             r = [0, 0]
         todo_list_formatted = [
             {
-                'name': item['name'],
+                'name': item['name'] if 'name' in item.keys() else "#None-TASK#",
                 'index': i,
                 'id': item['id'] if 'id' in item.keys() else 0,
                 'priority': item['priority'] if 'priority' in item.keys() else 0,
@@ -253,9 +262,15 @@ class Tools(MainTool, FileHandler):
             # Lambda-Funktion zum Filtern der Task-Objekte nach den IDs
             filter_tasks = lambda ids, tasks: list(filter(lambda task: task['index'] in ids, tasks))
             wx_x = filter_tasks(wx_now_x_ids, wx)
-            ts.append(wx_x)
+
+            for task_x, task_now in zip(wx_x, wx_now):
+                task_x['cal'] = task_now['cal']
+
             for index in wx_now_x_ids:
                 wx.remove(wx[index])
+
+            ts.append(wx_x)
+
         else:
             ts.append(wx_now)
             wx = []
@@ -305,10 +320,8 @@ class Tools(MainTool, FileHandler):
 
         res = app.MOD_LIST["CLOUDM"].tools["validate_jwt"](command, app)
 
-        self.print(res)
         if isinstance(res, str):
             return res, True
-
 
         if not isinstance(res, dict):
             return res, True
